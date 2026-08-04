@@ -19,7 +19,7 @@ import json
 import re
 from pathlib import Path
 
-from src.task1_collect_legal_docs import LEGAL_DOCS
+from src.task1_collect_legal_docs import FULLTEXT_DOCS, LEGAL_DOCS
 
 # MarkItDown kéo theo magika -> onnxruntime (~200MB). Trong buổi lab 3 tiếng với
 # mạng chậm, chờ tải xong có thể ngốn hết một checkpoint. pdfminer.six chính là
@@ -36,7 +36,12 @@ LANDING_DIR = Path(__file__).parent.parent / "data" / "landing"
 OUTPUT_DIR = Path(__file__).parent.parent / "data" / "standardized"
 
 # filename -> thông tin nguồn, để gắn header cho file legal
-_LEGAL_META = {doc["filename"]: doc for doc in LEGAL_DOCS}
+_LEGAL_META = {doc["filename"]: doc for doc in (*LEGAL_DOCS, *FULLTEXT_DOCS)}
+
+# Định dạng đầu vào cho phần legal. .html là bản toàn văn dạng text (xem Task 1);
+# .pdf công báo là bản scan nên thường không bóc được chữ, giữ lại chủ yếu để
+# chứng minh xuất xứ.
+LEGAL_INPUT_SUFFIXES = (".html", ".htm", ".pdf", ".docx", ".doc")
 
 
 def _clean_pdf_text(text: str) -> str:
@@ -81,23 +86,101 @@ def _legal_header(filename: str) -> str:
     if not meta:
         return f"# {Path(filename).stem}\n\n"
 
+    # Với bản toàn văn, ghi thêm URL văn bản chính thức trên cổng Chính phủ để
+    # citation ở Task 10 trỏ về nguồn gốc chứ không dừng ở trang trung gian.
+    official = meta.get("official_url")
+    nguon = (
+        f"**Nguồn chính thức:** {official}\n**Bản toàn văn:** {meta['url']}\n"
+        if official else f"**Nguồn:** {meta['url']}\n"
+    )
+
     return (
         f"# {meta['title']}\n\n"
-        f"**Loại nguồn:** Văn bản quy phạm pháp luật (bản gốc có chữ ký số)\n"
-        f"**Nguồn:** {meta['url']}\n"
+        f"**Loại nguồn:** Văn bản quy phạm pháp luật\n"
+        f"{nguon}"
         f"**Nội dung liên quan:** {meta['desc']}\n\n"
         f"---\n\n"
     )
 
 
+# Widget của trang nguồn nằm xen giữa các điều khoản, không phải nội dung văn bản
+_HTML_NOISE_SELECTORS = ["span.tooltip-button", ".target-hidden", ".bg-theo-doi"]
+_HTML_NOISE_PHRASES = {"đang theo dõi", "theo dõi", "tải biểu mẫu", "tải về",
+                       "lưu văn bản", "xem thêm", "thuộc tính", "tải word"}
+
+_BLOCK_TAGS = ["p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "td", "th", "caption"]
+
+
+def _extract_html_text(filepath: Path) -> str:
+    """
+    Chuyển HTML toàn văn sang text có cấu trúc.
+
+    Hai thứ phải xử lý, nếu bỏ qua thì corpus hỏng nặng:
+
+    1. Nút "Đang theo dõi" của trang nguồn chèn giữa mọi khoản — chiếm tới 1/3
+       tổng số dòng. Để nguyên thì chunk bị rác ăn mất chỗ và IDF của BM25 bị
+       méo vì mấy từ đó bỗng trở nên "phổ biến" khắp corpus.
+
+    2. get_text("\\n") xuống dòng ở MỌI thẻ, kể cả <a> inline. Văn bản luật dẫn
+       chiếu chằng chịt ("theo quy định của <a>Luật Doanh nghiệp</a>,") nên một
+       câu bị vỡ thành nhiều mảnh, có dòng chỉ còn đúng dấu phẩy. Câu vỡ làm
+       hỏng cả embedding (Task 5) lẫn ranh giới chunk (Task 4).
+       Cách xử lý: làm phẳng từng khối (p/li/h*/td) thành một dòng trước, rồi
+       mới xuống dòng theo khối.
+    """
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(filepath.read_text(encoding="utf-8"), "lxml")
+
+    for tag in soup(["script", "style", "noscript"]):
+        tag.decompose()
+    for selector in _HTML_NOISE_SELECTORS:
+        for tag in soup.select(selector):
+            tag.decompose()
+
+    # Làm phẳng khối: gộp toàn bộ text con (kể cả thẻ inline) thành 1 dòng
+    for el in soup.find_all(_BLOCK_TAGS):
+        el.string = el.get_text(" ", strip=True)
+
+    # Bảng -> mỗi hàng 1 dòng, các ô ngăn bằng " | " (giữ được ranh giới vùng
+    # lương trong biểu mức lương tối thiểu)
+    for table in soup.find_all("table"):
+        rows = []
+        for tr in table.find_all("tr"):
+            cells = [c.get_text(" ", strip=True) for c in tr.find_all(["td", "th"])]
+            cells = [c for c in cells if c]
+            if cells:
+                rows.append(" | ".join(cells))
+        table.replace_with("\n" + "\n".join(rows) + "\n")
+
+    lines = []
+    for raw in soup.get_text("\n").split("\n"):
+        line = re.sub(r"\s+", " ", raw).strip()
+        if not line:
+            continue
+        if line.lower() in _HTML_NOISE_PHRASES:
+            continue
+        # Dòng chỉ còn dấu câu — mảnh vụn sót lại, không mang thông tin
+        if not re.search(r"\w", line):
+            continue
+        lines.append(line)
+
+    return "\n".join(lines)
+
+
 def _extract_text(filepath: Path, md_converter) -> str:
-    """Bóc text thô từ 1 file, ưu tiên MarkItDown và lùi về pdfminer.six."""
+    """Bóc text thô từ 1 file theo định dạng."""
+    suffix = filepath.suffix.lower()
+
+    if suffix in (".html", ".htm"):
+        return _extract_html_text(filepath)
+
     if md_converter is not None:
         return md_converter.convert(str(filepath)).text_content or ""
 
-    if filepath.suffix.lower() != ".pdf":
+    if suffix != ".pdf":
         raise RuntimeError(
-            f"Không có MarkItDown nên chỉ xử lý được PDF, gặp {filepath.suffix}"
+            f"Không có MarkItDown nên chỉ xử lý được PDF/HTML, gặp {suffix}"
         )
 
     from pdfminer.high_level import extract_text
@@ -128,7 +211,7 @@ def convert_legal_docs() -> int:
     # Ưu tiên giữ file có tên mô tả rõ (nằm trong LEGAL_DOCS) để còn gắn được
     # header nguồn phục vụ citation ở Task 10.
     files = [f for f in legal_dir.iterdir()
-             if f.is_file() and f.suffix.lower() in (".pdf", ".docx", ".doc")]
+             if f.is_file() and f.suffix.lower() in LEGAL_INPUT_SUFFIXES]
     files.sort(key=lambda f: (0 if f.name in _LEGAL_META else 1, f.name))
 
     seen_hashes: dict[str, str] = {}
@@ -150,8 +233,8 @@ def convert_legal_docs() -> int:
 
         body = _clean_pdf_text(raw_text)
         if len(body) < 200:
-            print(f"    ✗ Chỉ trích được {len(body)} ký tự — "
-                  f"PDF có thể là bản scan ảnh, cần OCR")
+            print(f"    ⊘ Chỉ trích được {len(body)} ký tự — bản scan ảnh, "
+                  f"không có lớp text. Dùng bản *-toanvan.html thay thế.")
             continue
 
         content = _legal_header(filepath.name) + body
