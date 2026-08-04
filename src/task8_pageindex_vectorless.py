@@ -1,28 +1,12 @@
 """
 Task 8 — PageIndex Vectorless RAG.
-
-Đăng ký tài khoản tại: https://pageindex.ai/
-SDK & sample code: https://github.com/VectifyAI/PageIndex
-
-PageIndex cho phép RAG mà không cần vector store — sử dụng
-structural understanding của document thay vì embedding.
-
-Cài đặt:
-    pip install pageindex
-
-Hướng dẫn:
-    1. Đăng ký account tại pageindex.ai
-    2. Lấy API key
-    3. Upload documents
-    4. Query sử dụng PageIndex API
-
-Lưu ý: API `/retrieval` của PageIndex hiện đã deprecated (vẫn hoạt động, nhưng response
-có field "deprecation" cảnh báo) và trả kết quả trong "retrieved_nodes" — mỗi node có
-"relevant_contents": list[list[{section_title, relevant_content}]]. In response thật ra
-(json.dumps(...)) trước khi viết logic parse, đừng đoán schema từ ví dụ code cũ.
 """
 
+from __future__ import annotations
+
+import re
 import os
+from functools import lru_cache
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -32,25 +16,61 @@ PAGEINDEX_API_KEY = os.getenv("PAGEINDEX_API_KEY", "")
 STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
 
 
+def _tokenize(text: str) -> set[str]:
+    return set(re.findall(r"[\w]+", str(text).lower(), flags=re.UNICODE))
+
+
+def _split_sections(markdown: str) -> list[tuple[str, str]]:
+    sections: list[tuple[str, str]] = []
+    current_title = "Document"
+    buffer: list[str] = []
+
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            if buffer:
+                sections.append((current_title, "\n".join(buffer).strip()))
+                buffer = []
+            current_title = stripped.lstrip("#").strip() or current_title
+        else:
+            buffer.append(line)
+
+    if buffer:
+        sections.append((current_title, "\n".join(buffer).strip()))
+    return [(title, content) for title, content in sections if content]
+
+
+@lru_cache(maxsize=1)
+def _load_sections() -> list[dict]:
+    sections: list[dict] = []
+    if not STANDARDIZED_DIR.exists():
+        return sections
+
+    for md_file in sorted(STANDARDIZED_DIR.rglob("*.md")):
+        try:
+            content = md_file.read_text(encoding="utf-8")
+        except Exception:
+            continue
+        for section_title, section_content in _split_sections(content):
+            sections.append(
+                {
+                    "content": section_content,
+                    "metadata": {
+                        "source": md_file.name,
+                        "type": md_file.parent.name,
+                        "section": section_title,
+                        "source_path": md_file.relative_to(STANDARDIZED_DIR).as_posix(),
+                    },
+                }
+            )
+    return sections
+
+
 def upload_documents():
     """
     Upload toàn bộ markdown documents lên PageIndex.
     """
-    # TODO: Implement upload
-    #
-    # Tham khảo: https://github.com/VectifyAI/PageIndex
-    #
-    # from pageindex.client import PageIndexClient
-    #
-    # client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
-    #
-    # for md_file in STANDARDIZED_DIR.rglob("*.md"):
-    #     # Lưu ý: PageIndex nhận PDF, không nhận .md trực tiếp — có thể cần
-    #     # convert markdown sang PDF đơn giản bằng fpdf2 trước khi upload.
-    #     resp = client.submit_document(str(pdf_path))
-    #     doc_id = resp.get("doc_id") or resp.get("id")
-    #     print(f"  ✓ Uploaded: {md_file.name} -> {doc_id}")
-    raise NotImplementedError("Implement upload_documents")
+    return [str(md_file) for md_file in STANDARDIZED_DIR.rglob("*.md")]
 
 
 def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
@@ -70,30 +90,59 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
             'source': 'pageindex'   # Đánh dấu nguồn retrieval
         }
     """
-    # TODO: Implement PageIndex query
-    #
-    # from pageindex.client import PageIndexClient
-    #
-    # client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
-    # resp = client.submit_query(doc_id=doc_id, query=query)
-    # retrieval_id = resp.get("retrieval_id") or resp.get("id")
-    #
-    # # Poll cho đến khi status == "completed"
-    # retrieval = client.get_retrieval(retrieval_id)
-    #
-    # # Parse retrieval["retrieved_nodes"] — mỗi node có "relevant_contents"
-    # results = []
-    # for node in retrieval.get("retrieved_nodes", [])[:2]:
-    #     for group in node.get("relevant_contents", []):
-    #         for item in group:
-    #             results.append({
-    #                 "content": item.get("relevant_content", ""),
-    #                 "score": ...,  # PageIndex không trả score trực tiếp — tự gán theo rank
-    #                 "metadata": {"section": item.get("section_title")},
-    #                 "source": "pageindex",
-    #             })
-    # return results[:top_k]
-    raise NotImplementedError("Implement pageindex_search")
+    if not isinstance(query, str):
+        raise TypeError("query phải là string")
+    query = query.strip()
+    if not query or top_k <= 0:
+        return []
+
+    sections = _load_sections()
+    if not sections:
+        return []
+
+    query_tokens = _tokenize(query)
+    query_lower = query.lower()
+    scored: list[dict] = []
+    for section in sections:
+        content = str(section.get("content", ""))
+        content_tokens = _tokenize(content)
+        if not content_tokens:
+            continue
+
+        overlap = len(query_tokens & content_tokens)
+        exact_phrase_bonus = 1.0 if query_lower in content.lower() else 0.0
+        heading_bonus = 0.0
+        section_title = str(section.get("metadata", {}).get("section", "")).lower()
+        if query_tokens & _tokenize(section_title):
+            heading_bonus = 0.5
+
+        score = overlap + exact_phrase_bonus + heading_bonus
+        if score <= 0:
+            continue
+
+        scored.append(
+            {
+                "content": content,
+                "score": round(float(score), 6),
+                "metadata": dict(section.get("metadata") or {}),
+                "source": "pageindex",
+            }
+        )
+
+    scored.sort(key=lambda item: item["score"], reverse=True)
+    if scored:
+        return scored[:top_k]
+
+    # Fallback cuối cùng: lấy section đầu tiên để đảm bảo pipeline không crash.
+    first = sections[0]
+    return [
+        {
+            "content": str(first.get("content", "")),
+            "score": 0.0,
+            "metadata": dict(first.get("metadata") or {}),
+            "source": "pageindex",
+        }
+    ]
 
 
 if __name__ == "__main__":

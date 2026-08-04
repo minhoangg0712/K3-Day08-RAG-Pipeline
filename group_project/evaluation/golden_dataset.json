@@ -1,17 +1,92 @@
-[
+﻿[
   {
-    "question": "Học phí hàng năm của chương trình Business tại RMIT Vietnam là bao nhiêu?",
-    "expected_answer": "Khoảng 375.840.000 VND mỗi năm (tùy chương trình cụ thể).",
-    "expected_context": "Trang Tuition Fees, mục Undergraduate Programs"
+    "question": "Người lao động làm thêm giờ vào ngày thường được trả lương tối thiểu bằng bao nhiêu phần trăm?",
+    "expected_answer": "Ít nhất bằng 150% so với đơn giá tiền lương bình thường.",
+    "expected_context": "Điều 98 Bộ luật Lao động 2019 về tiền lương làm thêm giờ ngày thường"
   },
   {
-    "question": "Học phí được thanh toán theo hình thức nào?",
-    "expected_answer": "Thanh toán theo từng học kỳ, tính theo từng môn học đã đăng ký.",
-    "expected_context": "Trang Tuition Fees, mục Payment Structure"
+    "question": "Người sử dụng lao động cần đáp ứng những điều kiện gì để được phép sử dụng người lao động làm thêm giờ?",
+    "expected_answer": "Phải được sự đồng ý của người lao động; bảo đảm số giờ làm thêm không quá 50% giờ bình thường trong 1 ngày; không quá 40 giờ trong 1 tháng và không quá 200 giờ trong 1 năm.",
+    "expected_context": "Khoản 2 Điều 107 Bộ luật Lao động 2019 về điều kiện làm thêm giờ"
   },
   {
-    "question": "Trường có cung cấp ký túc xá trong khuôn viên không?",
-    "expected_answer": "Không — trường không cung cấp chỗ ở trong khuôn viên, nhưng có đội ngũ hỗ trợ sinh viên tìm chỗ ở gần trường.",
-    "expected_context": "Trang Accommodation Services"
+    "question": "Thời giờ làm việc bình thường tối đa của người lao động là bao nhiêu giờ trong một ngày?",
+    "expected_answer": "Không quá 8 giờ trong 1 ngày và không quá 48 giờ trong 1 tuần.",
+    "expected_context": "Điều 105 Bộ luật Lao động 2019 về thời giờ làm việc bình thường"
+  },
+  {
+    "question": "Người lao động làm thêm giờ vào ngày nghỉ hàng tuần được hưởng lương tối thiểu bằng bao nhiêu phần trăm?",
+    "expected_answer": "Ít nhất bằng 200% tiền lương.",
+    "expected_context": "Điều 98 Bộ luật Lao động 2019 về tiền lương làm thêm giờ ngày nghỉ hàng tuần"
+  },
+  {
+    "question": "Người lao động nghỉ hàng năm có được thanh toán tiền nếu không nghỉ hết phép không?",
+    "expected_answer": "Có, nếu do lý do của người sử dụng lao động mà người lao động không sử dụng hết ngày nghỉ hàng năm thì được thanh toán bằng tiền cho những ngày chưa nghỉ.",
+    "expected_context": "Quy định về thanh toán tiền nghỉ phép năm chưa sử dụng hết"
+  },
+  {
+    "question": "Thời gian thử việc của người lao động có được tính vào ngày nghỉ phép hàng năm không?",
+    "expected_answer": "Thời gian thử việc được tính vào thời gian làm việc để tính số ngày nghỉ hàng năm nếu người lao động được tuyển dụng chính thức.",
+    "expected_context": "Quy định về tính thời gian thử việc vào ngày nghỉ phép"
+  },
+  {
+    "question": "Người lao động tự ý bỏ việc bao nhiêu ngày liên tục thì có thể bị sa thải?",
+    "expected_answer": "Người sử dụng lao động có thể áp dụng hình thức kỷ luật sa thải khi người lao động tự ý bỏ việc 5 ngày cộng dồn trong 1 tháng hoặc 20 ngày cộng dồn trong 1 năm mà không có lý do chính đáng.",
+    "expected_context": "Quy định về xử lý kỷ luật sa thải khi tự ý bỏ việc"
+  },
+  {
+    "question": "Điều kiện nào để áp dụng hình thức kỷ luật sa thải đối với người lao động?",
+    "expected_answer": "Sa thải áp dụng khi người lao động có hành vi trộm cắp, tham ô, tiết lộ bí mật kinh doanh, bị xử lý kỷ luật mà tái phạm, hoặc tự ý bỏ việc từ 5 ngày cộng dồn trong 1 tháng trở lên.",
+    "expected_context": "Điều kiện áp dụng hình thức sa thải lao động"
+  },
+  {
+    "question": "Đơn phương chấm dứt hợp đồng lao động đúng luật cần những điều kiện gì?",
+    "expected_answer": "Người lao động có quyền đơn phương chấm dứt hợp đồng nhưng phải báo trước theo thời hạn quy định, tùy loại hợp đồng và lý do chấm dứt.",
+    "expected_context": "Quy định về đơn phương chấm dứt hợp đồng lao động đúng luật"
+  },
+  {
+    "question": "Những trường hợp nào được coi là chấm dứt hợp đồng lao động trái luật?",
+    "expected_answer": "Chấm dứt hợp đồng trái luật là khi không có lý do hợp pháp, không báo trước đúng thời hạn, hoặc chấm dứt trong thời gian người lao động đang ốm đau, nghỉ thai sản.",
+    "expected_context": "Các trường hợp chấm dứt hợp đồng lao động bị coi là trái luật"
+  },
+  {
+    "question": "Người lao động làm thêm giờ trong ngày lễ, tết được trả lương tối thiểu bằng bao nhiêu phần trăm?",
+    "expected_answer": "Ít nhất bằng 300% chưa kể tiền lương ngày lễ, tết, ngày nghỉ có hưởng lương.",
+    "expected_context": "Điều 98 Bộ luật Lao động 2019 về tiền lương làm thêm giờ ngày lễ tết"
+  },
+  {
+    "question": "Số giờ làm thêm tối đa trong 1 năm của người lao động là bao nhiêu theo quy định thông thường?",
+    "expected_answer": "Không quá 200 giờ trong 1 năm theo quy định thông thường.",
+    "expected_context": "Khoản 2 Điều 107 Bộ luật Lao động 2019 về giới hạn giờ làm thêm"
+  },
+  {
+    "question": "Lương làm thêm giờ tối đa trong 1 tháng là bao nhiêu giờ?",
+    "expected_answer": "Không quá 40 giờ trong 1 tháng.",
+    "expected_context": "Khoản 2 Điều 107 Bộ luật Lao động 2019 về giới hạn giờ làm thêm trong tháng"
+  },
+  {
+    "question": "Người lao động làm thêm giờ trong trường hợp đặc biệt nào thì không được từ chối?",
+    "expected_answer": "Không được từ chối khi thực hiện lệnh động viên quốc phòng, an ninh; hoặc thực hiện công việc bảo vệ tính mạng con người, tài sản trong phòng ngừa khắc phục thiên tai, hỏa hoạn, dịch bệnh.",
+    "expected_context": "Điều 108 Bộ luật Lao động 2019 về làm thêm giờ trường hợp đặc biệt"
+  },
+  {
+    "question": "Quy định về thời gian thông báo trước khi chấm dứt hợp đồng lao động xác định thời hạn là bao lâu?",
+    "expected_answer": "Người lao động làm việc theo hợp đồng xác định thời hạn phải báo trước ít nhất 30 ngày.",
+    "expected_context": "Quy định về thời gian báo trước khi chấm dứt hợp đồng lao động"
+  },
+  {
+    "question": "Khi nào thì áp dụng kỷ luật sa thải do vi phạm nội quy lao động?",
+    "expected_answer": "Khi người lao động đã bị xử lý kỷ luật kéo dài thời hạn nâng lương hoặc cách chức mà tái phạm trong thời gian chưa xóa kỷ luật.",
+    "expected_context": "Quy định về điều kiện áp dụng sa thải khi tái phạm"
+  },
+  {
+    "question": "Người sử dụng lao động vi phạm quy định trả lương làm thêm giờ bị xử phạt như thế nào?",
+    "expected_answer": "Tùy mức độ vi phạm, người sử dụng lao động có thể bị phạt tiền theo quy định của Nghị định về xử phạt vi phạm hành chính trong lĩnh vực lao động.",
+    "expected_context": "Nghị định 12/2022 về xử phạt vi phạm hành chính trong lĩnh vực lao động"
+  },
+  {
+    "question": "Người sử dụng lao động có nghĩa vụ gì khi chấm dứt hợp đồng lao động trái pháp luật?",
+    "expected_answer": "Phải nhận người lao động trở lại làm việc, trả tiền lương và đóng BHXH trong thời gian không được làm việc, và bồi thường thêm ít nhất 2 tháng lương.",
+    "expected_context": "Quy định bồi thường khi chấm dứt hợp đồng lao động trái luật"
   }
 ]
