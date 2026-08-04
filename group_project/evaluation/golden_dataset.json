@@ -13,5 +13,65 @@
     "question": "Trường có cung cấp ký túc xá trong khuôn viên không?",
     "expected_answer": "Không — trường không cung cấp chỗ ở trong khuôn viên, nhưng có đội ngũ hỗ trợ sinh viên tìm chỗ ở gần trường.",
     "expected_context": "Trang Accommodation Services"
+  },
+  {
+    "question": "Điều kiện để xin học bổng Academic Achievement là gì?",
+    "expected_answer": "Sinh viên cần có thành tích học tập nổi bật và đáp ứng tiêu chí xét học bổng của trường.",
+    "expected_context": "Trang Academic Achievement Scholarship"
+  },
+  {
+    "question": "Sinh viên có thể đăng ký học phần ở đâu?",
+    "expected_answer": "Sinh viên đăng ký học phần qua cổng đăng ký học phần hoặc hệ thống myRMIT.",
+    "expected_context": "Trang Course Registration Portal"
+  },
+  {
+    "question": "Các khoản phí học tập có thể xem ở đâu?",
+    "expected_answer": "Có thể xem trong trang Tuition Fees của trường với chi tiết theo chương trình học.",
+    "expected_context": "Trang Tuition Fees"
+  },
+  {
+    "question": "Nhà trường có hỗ trợ tìm chỗ ở gần trường không?",
+    "expected_answer": "Có, trường có dịch vụ hỗ trợ sinh viên tìm chỗ ở gần khuôn viên.",
+    "expected_context": "Trang Accommodation Services"
+  },
+  {
+    "question": "Học bổng có thể áp dụng cho sinh viên quốc tế không?",
+    "expected_answer": "Một số chương trình học bổng có thể áp dụng cho sinh viên quốc tế nếu đáp ứng điều kiện cụ thể.",
+    "expected_context": "Trang Scholarship eligibility"
+  },
+  {
+    "question": "Sinh viên cần lưu ý gì khi thanh toán học phí?",
+    "expected_answer": "Cần thanh toán đúng hạn theo từng học kỳ và theo các môn đã đăng ký.",
+    "expected_context": "Trang Tuition Fees, mục Payment deadline"
+  },
+  {
+    "question": "Dịch vụ thư viện có hỗ trợ đặt phòng học nhóm không?",
+    "expected_answer": "Có, thư viện có dịch vụ hỗ trợ đặt phòng học nhóm hoặc khu vực học tập.",
+    "expected_context": "Trang Library services"
+  },
+  {
+    "question": "Có thông tin nào về hỗ trợ sinh viên trên website trường không?",
+    "expected_answer": "Có, website có các bài viết và dịch vụ hỗ trợ sinh viên liên quan đến học tập và đời sống.",
+    "expected_context": "Trang Student support / news"
+  },
+  {
+    "question": "Sinh viên có thể tìm thông báo sự kiện ở đâu?",
+    "expected_answer": "Sinh viên có thể xem các bài tin tức hoặc thông báo sự kiện trên trang news của trường.",
+    "expected_context": "Trang News / Events"
+  },
+  {
+    "question": "Quy định đăng ký học phần có yêu cầu gì đặc biệt không?",
+    "expected_answer": "Sinh viên cần đăng ký đúng thời gian và tuân thủ các quy định của trường khi chọn môn.",
+    "expected_context": "Trang Course Registration Portal"
+  },
+  {
+    "question": "Có hỗ trợ gì cho sinh viên về chỗ ở trong giai đoạn nhập học không?",
+    "expected_answer": "Có, sinh viên được hỗ trợ tìm chỗ ở phù hợp gần trường trong giai đoạn đầu nhập học.",
+    "expected_context": "Trang Accommodation Services"
+  },
+  {
+    "question": "Học bổng và học phí có thông tin tách riêng trên website không?",
+    "expected_answer": "Có, học phí và học bổng thường được trình bày ở các trang nội dung riêng.",
+    "expected_context": "Trang Tuition Fees và Academic Scholarship"
   }
 ]
