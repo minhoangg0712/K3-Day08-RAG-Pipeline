@@ -40,18 +40,29 @@ CHROMA_DIR = Path(__file__).parent.parent / "chroma_db"
 # CONFIGURATION — Giải thích lựa chọn của bạn trong comment
 # =============================================================================
 
-# TODO: Chọn chunking strategy và giải thích vì sao
-CHUNK_SIZE = 500        # Vì sao chọn 500? ...
-CHUNK_OVERLAP = 50      # Vì sao chọn 50? ...
+# Chunking: 800 ký tự, overlap 100 (đúng tham số bài lab yêu cầu).
+# Vì sao 800 hợp với văn bản luật: đơn vị trả lời tự nhiên ở đây là một "khoản"
+# hoặc một "điều" ngắn. Đo trên corpus thực tế, phần lớn khoản dài 300-700 ký tự,
+# nên 800 đủ để giữ trọn một khoản trong cùng một chunk. Cắt nhỏ hơn (500) hay
+# làm đứt đôi điều kiện: "Không quá 60 ngày đối với công việc có chức danh nghề
+# nghiệp cần trình độ..." bị tách khỏi "Điều 25. Thời gian thử việc", và chunk
+# đó mất luôn ngữ cảnh cho biết 60 ngày này nói về cái gì.
+# Overlap 100 để câu bị cắt ngang ranh giới vẫn còn nguyên vẹn ở một trong hai
+# chunk kề nhau.
+CHUNK_SIZE = 800
+CHUNK_OVERLAP = 100
 CHUNKING_METHOD = "recursive"  # "recursive" | "markdown_header" | "semantic"
 
-# TODO: Chọn embedding model và giải thích
-EMBEDDING_MODEL = "BAAI/bge-m3"  # Vì sao? Multilingual, tốt cho tiếng Việt lẫn tiếng Anh
+# BAAI/bge-m3: multilingual, huấn luyện có tiếng Việt, độ dài ngữ cảnh 8192.
+# Lưu ý dung lượng: model ~2.2GB, cộng torch nữa là khoảng 3GB phải tải về.
+EMBEDDING_MODEL = "BAAI/bge-m3"
 EMBEDDING_DIM = 1024
 
-# TODO: Chọn vector store
 VECTOR_STORE = "chromadb"  # "chromadb" | "weaviate" | "faiss"
-COLLECTION_NAME = "university_services_docs"
+# Đổi tên theo chủ đề của nhóm (Luật Lao động), không dùng lại tên mẫu của
+# starter. Tên collection sai chủ đề dễ khiến người sau tưởng đang đọc nhầm dữ
+# liệu khi debug.
+COLLECTION_NAME = "labor_law_docs"
 
 
 # =============================================================================
