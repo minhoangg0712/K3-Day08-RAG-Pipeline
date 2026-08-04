@@ -1,0 +1,45 @@
+# Cần điều kiện gì để sử dụng người lao động làm thêm giờ?
+
+**Loại nguồn:** Bài viết hướng dẫn / tư vấn pháp luật
+**Nguồn:** https://baochinhphu.vn/can-dieu-kien-gi-de-su-dung-nguoi-lao-dong-lam-them-gio-102291610.htm
+**Ngày thu thập:** 2026-08-04T10:39:57.321575
+
+---
+
+Về vấn đề này, Luật sư Trần Văn Toàn, Văn phòng luật sư Khánh Hưng - Đoàn luật sư Hà Nội trả lời như sau :
+
+Tại Điều 105 Bộ luật Lao động 2019 (có hiệu lực từ ngày 1/1/2021) quy định, thời giờ làm việc bình thường không quá 8 giờ trong 1 ngày và không quá 48 giờ trong 1 tuần. Trường hợp theo tuần thì thời giờ làm việc bình thường không quá 10 giờ trong 1 ngày và không quá 48 giờ trong 1 tuần. Nhà nước khuyến khích người sử dụng lao động thực hiện tuần làm việc 40 giờ đối với người lao động.
+
+Tại Khoản 1 Điều 107 Bộ luật này quy định, thời gian làm thêm giờ là khoảng thời gian làm việc ngoài thời giờ làm việc bình thường theo quy định của pháp luật, thỏa ước lao động tập thể hoặc nội quy lao động.
+
+Tương tự, trường hợp làm việc vào ngày nghỉ hàng tuần quy định tại Điều 112 là làm việc thêm giờ vào ngày nghỉ hàng tuần; Trường hợp làm việc vào những ngày nghỉ lễ, tết có hưởng lương quy định tại Điều 113 của Bộ luật này là làm việc thêm giờ vào ngày nghỉ lễ, tết, ngày nghỉ có hưởng lương.
+
+Tại Khoản 1 Điều 98 Bộ luật Lao động 2019 quy đinh, người lao động làm thêm giờ được trả lương tính theo đơn giá tiền lương hoặc tiền lương thực trả theo công việc đang làm như sau: Vào ngày thường, ít nhất bằng 150%; Vào ngày nghỉ hằng tuần, ít nhất bằng 200%; Vào ngày nghỉ lễ, tết, ngày nghỉ có hưởng lương, ít nhất bằng 300% chưa kể tiền lương ngày lễ, tết, ngày nghỉ có hưởng lương đối với người lao động hưởng lương ngày.
+
+Trả lời việc bà Lê Thị Thêm hỏi, công nhân lái xe tại công ty trách nhiệm hữu hạn một thành viên do Nhà nước năm giữ 100% vốn điều lệ có được làm thêm giờ vào ngày thường không hay chỉ được làm thêm giờ ngày Lễ, Tết, thứ Bảy, Chủ nhật?
+
+Tại Điều 2 Bộ luật Lao động 2019 quy định đối tượng áp dụng Bộ luật này bao gồm: Người lao động, người học nghề, người tập nghề và người làm việc không có quan hệ lao động; Người sử dụng lao động; Người lao động nước ngoài làm việc tại Việt Nam; Cơ quan, tổ chức, cá nhân khác có liên quan trực tiếp đến quan hệ lao động. Theo đó, người lao động (bao gồm công nhân lái xe) làm việc tại công ty trách nhiệm hữu hạn một thành viên do Nhà nước nắm giữ 100% vốn điều lệ và công ty này thuộc đối tượng áp dụng quy định tại Bộ luật Lao động, trong đó có quy định về làm thêm giờ, làm thêm giờ trong trường hợp đặc biệt.
+
+Trường hợp người lao động làm việc thêm giờ, bao gồm làm thêm giờ vào ngày thường, hoặc làm thêm giờ vào ngày nghỉ hàng tuần (thứ bảy, chủ nhật), hoặc làm thêm giờ vào ngày lễ, tết, ngày nghỉ có hưởng lương, đều phải được người sử dụng lao động điều động, bố trí theo yêu cầu của hoạt động sản xuất kinh doanh hoặc yêu cầu khác trong trường hợp đặc biệt.
+
+Tại Khoản 2 Điều 107 Bộ Luật Lao động 2019 quy định, người sử dụng lao động được sử dụng người lao động làm thêm giờ khi đáp ứng đầy đủ các yêu cầu sau đây:
+
+- Phải được sự đồng ý của người lao động (về thời gian làm thêm; dịa điểm làm thêm; công việc làm thêm).
+
+- Bảo đảm số giờ làm thêm của người lao động không quá 50% số giờ làm việc bình thường trong 1 ngày; trường hợp áp dụng quy định thời giờ làm việc bình thường theo tuần thì tổng số giờ làm việc bình thường và số giờ làm thêm không quá 12 giờ trong 1 ngày; không quá 40 giờ trong 1 tháng;
+
+- Bảo đảm số giờ làm thêm của người lao động không quá 200 giờ trong 1 năm.
+
+Trường hợp đặc biệt, Điều 108 Bộ luật này quy định, người sử dụng lao động có quyền yêu cầu người lao động làm thêm giờ vào bất kỳ ngày nào mà không bị giới hạn về số giờ làm thêm theo quy định tại Điều 107 của Bộ luật này và người lao động không được từ chối trong trường hợp sau đây:
+
+- Thực hiện lệnh động viên, huy động bảo đảm nhiệm vụ quốc phòng, an ninh theo quy định của pháp luật;
+
+- Thực hiện các công việc nhằm bảo vệ tính mạng con người, tài sản của cơ quan, tổ chức, cá nhân trong phòng ngừa, khắc phục hậu quả thiên tai, hỏa hoạn, dịch bệnh nguy hiểm và thảm họa, trừ trường hợp có nguy cơ ảnh hưởng đến tính mạng, sức khỏe của người lao động theo quy định của pháp luật về an toàn, vệ sinh lao động.
+
+Người lao động làm thêm giờ vào ngày thường, hoặc vào ngày nghỉ hàng tuần, hoặc vào ngày nghỉ Lễ, Tết, ngày nghỉ có hưởng lương được người sử dụng lao động tính, trả lương làm thêm giờ theo quy định tại Điều 98 Bộ luật Lao động.
+
+Đề nghị bà Lê Thị Thêm đối chiếu các quy định nêu trên để áp dụng thực hiện việc bố trí làm việc thêm giờ cho người lao động, trong đó có công nhân lái xe tại đơn vị mình.
+
+VPLS Khánh Hưng, Đoàn luật sư Hà Nội
+
+* Thông tin chuyên mục có giá trị tham khảo với người đọc, không dùng làm tài liệu trong tố tụng pháp luật.
