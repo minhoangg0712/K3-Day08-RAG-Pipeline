@@ -29,7 +29,9 @@ Chạy:
 
 import json
 import os
+import re
 import time
+import unicodedata
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -216,9 +218,148 @@ def _parse_retrieval(retrieval: dict, top_k: int, doc_name: str) -> list[dict]:
     return results
 
 
+# =============================================================================
+# Vectorless chạy local — dùng khi chưa có PAGEINDEX_API_KEY
+# =============================================================================
+
+# Tiêu đề điều luật: "Điều 25. Thời gian thử việc"
+_ARTICLE_RE = re.compile(r"^Điều\s+(\d+)\s*\.\s*(.*)$", re.MULTILINE)
+# Tiêu đề chương: "Chương III" / "Chương III HỢP ĐỒNG LAO ĐỘNG"
+_CHAPTER_RE = re.compile(r"^Chương\s+([IVXLC]+)\s*(.*)$", re.MULTILINE)
+
+_LOCAL_STOPWORDS = {
+    "là", "của", "và", "có", "cho", "được", "thì", "khi", "không", "phải",
+    "tôi", "bao", "nhiêu", "gì", "nào", "với", "trong", "một", "các", "này",
+    "mà", "để", "ở", "về", "hay", "bằng", "sau", "trước", "đã", "sẽ", "còn",
+    "theo", "những", "người", "lao", "động",
+}
+
+
+def _tokens(text: str) -> set[str]:
+    ws = re.findall(r"[0-9a-zà-ỹ]+", unicodedata.normalize("NFC", text).lower())
+    return {w for w in ws if len(w) > 1 and w not in _LOCAL_STOPWORDS}
+
+
+def _build_article_tree() -> list[dict]:
+    """
+    Dựng cây Chương → Điều từ các file markdown văn bản luật.
+
+    Đây là bản địa phương hoá ý tưởng của PageIndex: thay vì cắt tài liệu thành
+    chunk cố định rồi so vector, ta giữ nguyên ranh giới ĐIỀU LUẬT — đơn vị ngữ
+    nghĩa thật sự của văn bản quy phạm — và ghi lại chương cha của nó. Một điều
+    luật vì thế luôn về nguyên vẹn, không bị cắt ngang giữa các khoản.
+    """
+    tree: list[dict] = []
+
+    for md_file in sorted((STANDARDIZED_DIR / "legal").glob("*.md")):
+        text = md_file.read_text(encoding="utf-8")
+
+        chapters = [(m.start(), f"Chương {m.group(1)} {m.group(2)}".strip())
+                    for m in _CHAPTER_RE.finditer(text)]
+
+        matches = list(_ARTICLE_RE.finditer(text))
+        for i, m in enumerate(matches):
+            start = m.start()
+            end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+
+            # Chương gần nhất phía trên điều này
+            chapter = ""
+            for pos, name in chapters:
+                if pos < start:
+                    chapter = name
+                else:
+                    break
+
+            tree.append({
+                "article_no": m.group(1),
+                "title": f"Điều {m.group(1)}. {m.group(2)}".strip(),
+                "chapter": chapter,
+                "body": text[start:end].strip(),
+                "doc": md_file.name,
+            })
+
+    return tree
+
+
+_TREE_CACHE: list[dict] | None = None
+
+
+def _local_structural_search(query: str, top_k: int = 5) -> list[dict]:
+    """
+    Duyệt cây điều luật bằng từ khoá — không embedding, không chunk cố định.
+
+    Cách chấm điểm bắt chước hành vi tra mục lục: TIÊU ĐỀ điều luật được tính
+    trọng số gấp 3 lần thân bài. Người tra cứu văn bản luật cũng làm đúng vậy —
+    đọc lướt tên điều trước, thấy khớp mới mở ra đọc nội dung.
+
+    Ưu tiên tuyệt đối cho truy vấn gọi thẳng số hiệu ("Điều 25 quy định gì"):
+    khớp đúng số điều thì đẩy lên đầu, vì đó là ý định tra cứu rõ ràng nhất.
+    """
+    global _TREE_CACHE
+    if _TREE_CACHE is None:
+        _TREE_CACHE = _build_article_tree()
+    if not _TREE_CACHE:
+        return []
+
+    q_tokens = _tokens(query)
+    if not q_tokens:
+        return []
+
+    asked_articles = set(re.findall(r"[Đđ]iều\s+(\d+)", query))
+
+    scored = []
+    for node in _TREE_CACHE:
+        title_hits = len(q_tokens & _tokens(node["title"]))
+        body_hits = len(q_tokens & _tokens(node["body"]))
+        chapter_hits = len(q_tokens & _tokens(node["chapter"]))
+
+        score = 3.0 * title_hits + 1.0 * body_hits + 1.5 * chapter_hits
+        if node["article_no"] in asked_articles:
+            score += 100.0
+
+        if score > 0:
+            scored.append((score, node))
+
+    if not scored:
+        return []
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = scored[:top_k]
+    max_score = top[0][0] or 1.0
+
+    return [
+        {
+            "content": node["body"][:2000],
+            # Chuẩn hoá về [0,1] để Task 9 và UI hiển thị cùng thang với cosine
+            "score": round(score / max_score, 4),
+            "metadata": {
+                "source": node["doc"],
+                "type": "legal",
+                "section": node["title"],
+                "chapter": node["chapter"],
+                "engine": "local-structural",
+            },
+            "source": "pageindex",
+        }
+        for score, node in top
+    ]
+
+
 def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
     """
-    Vectorless retrieval bằng PageIndex. Dùng làm fallback ở Task 9.
+    Vectorless retrieval. Dùng làm fallback ở Task 9.
+
+    Hai đường chạy:
+        1. PageIndex hosted API — khi có PAGEINDEX_API_KEY và đã upload tài liệu.
+        2. Duyệt cây điều luật CHẠY LOCAL — khi chưa cấu hình API key.
+
+    Đường 2 không phải PageIndex thật, và không giả vờ là như vậy: kết quả gắn
+    `metadata.engine = "local-structural"` để phân biệt. Nó tồn tại vì fallback
+    mà trả rỗng thì coi như không có fallback — Task 9 sẽ buộc phải trả về kết
+    quả hybrid điểm thấp cho đúng những truy vấn mà hybrid đã bó tay.
+
+    Trường `source` vẫn là `"pageindex"` ở cả hai đường vì đó là tên GIAI ĐOẠN
+    trong pipeline (nhánh vectorless), không phải tên nhà cung cấp.
 
     Args:
         query: Câu truy vấn
@@ -226,21 +367,19 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
 
     Returns:
         List of {'content', 'score', 'metadata', 'source': 'pageindex'}.
-        Trả LIST RỖNG (không ném lỗi) khi chưa cấu hình API key hoặc chưa upload
-        tài liệu — fallback không dùng được thì pipeline chính vẫn phải chạy
-        tiếp, không được kéo cả hệ thống sập theo.
+        Không bao giờ ném lỗi — fallback hỏng thì pipeline chính vẫn phải chạy.
     """
     client = _get_client()
     if client is None:
-        return []
+        return _local_structural_search(query, top_k)
 
     if not DOC_IDS_FILE.exists():
-        print("  ⚠ Chưa upload tài liệu lên PageIndex — chạy upload_documents()")
-        return []
+        print("  ⚠ Chưa upload tài liệu lên PageIndex — dùng cây điều luật local")
+        return _local_structural_search(query, top_k)
 
     doc_ids = json.loads(DOC_IDS_FILE.read_text(encoding="utf-8"))
     if not doc_ids:
-        return []
+        return _local_structural_search(query, top_k)
 
     results: list[dict] = []
 
@@ -286,8 +425,19 @@ if __name__ == "__main__":
         print("\n⚠ Chưa có PAGEINDEX_API_KEY trong .env")
         print("  Đăng ký tại https://pageindex.ai/ rồi thêm vào .env:")
         print("      PAGEINDEX_API_KEY=pix_...")
-        print("\n  pageindex_search() vẫn trả về [] để Task 9 không bị gãy.")
-        print(f"  Kiểm tra: pageindex_search('thử việc') = {pageindex_search('thử việc')}")
+        print("\n→ Đang chạy đường 2: duyệt cây điều luật LOCAL (không phải PageIndex thật)")
+
+        tree = _build_article_tree()
+        print(f"  Cây điều luật: {len(tree)} điều từ "
+              f"{len(set(n['doc'] for n in tree))} văn bản")
+
+        for q in ["thời gian thử việc tối đa là bao lâu",
+                  "trình tự xử lý kỷ luật sa thải gồm những bước nào",
+                  "Điều 98 quy định gì"]:
+            print(f"\n  {q!r}")
+            for r in pageindex_search(q, top_k=3):
+                print(f"    [{r['score']:.3f}] ({r['metadata']['section']}) "
+                      f"{' '.join(r['content'].split())[:70]}...")
         raise SystemExit(0)
 
     print("\nĐang upload tài liệu...")

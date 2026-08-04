@@ -1,6 +1,6 @@
 ---
-title: University Services RAG Chatbot
-emoji: 🎓
+title: Trợ Lý Hỏi Đáp Luật Lao Động
+emoji: ⚖️
 colorFrom: blue
 colorTo: indigo
 sdk: streamlit
@@ -550,19 +550,44 @@ run_dashboard()
 ### Kiến Trúc Hệ Thống
 
 ```
-[Vẽ diagram kiến trúc ở đây]
+data/landing/ (PDF · HTML · JSON)
+      │  Task 3 — MarkItDown
+      ▼
+data/standardized/*.md
+      │  Task 4 — chunk 800/100 · embed BAAI/bge-m3 (1024-d)
+      ▼
+ChromaDB — 1069 chunk
+      │
+      ├──► Task 5  semantic_search()   cosine (+ HyDE)  ─┐
+      │                                                  ├─► Task 7  rerank_rrf(k=60)
+      ├──► Task 6  lexical_search()    BM25 (+ TF-IDF)  ─┘          │
+      │                                                             ▼
+      └──► Task 8  pageindex_search()  ◄── nếu cosine GỐC < 0.48 ───┤
+                   (vectorless fallback)                            │
+                                                                    ▼
+                                     Task 9  retrieve()  →  Task 10  generate_with_citation()
+                                                              reorder [1,3,5,4,2]
+                                                              → LLM → "… [BLLĐ 2019, Điều 25]"
+                                                                    │
+                                                                    ▼
+                                                          app.py — Streamlit chat UI
 ```
+
+Chi tiết kiến trúc, các bẫy kỹ thuật và cách chạy: xem [`group_project/README.md`](group_project/README.md).
 
 ---
 
 ### Phân Công Công Việc
 
-| Thành viên | MSSV | Nhiệm vụ | Trạng thái |
-|-----------|------|----------|------------|
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+Nhóm 5 thành viên — Phương án B (chuyên sâu Retrieval).
+
+| Role | Thành viên | MSSV | Nhiệm vụ | Trạng thái |
+|---|---|---|---|---|
+| 1 — Team Leader & RAG Architect | | | Điều phối, ghép pipeline, Task 9 | ✅ |
+| 2 — Data & Dense Search Dev | | | Task 1–3, Task 4 (ChromaDB), Task 5 (HyDE) | ✅ |
+| 3 — Sparse Search & Reranking Dev | | | Task 6 (BM25/TF-IDF), Task 7 (RRF/MMR), Task 8 (PageIndex) | ✅ |
+| 4 — Frontend & Chatbot Dev | | | `app.py`, Task 10 (citation) | ✅ |
+| 5 — Evaluation & QA Engineer | | | golden dataset, RAGAS, `results.md` | ✅ |
 
 ---
 

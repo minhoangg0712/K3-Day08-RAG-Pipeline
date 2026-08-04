@@ -1,17 +1,142 @@
 [
   {
-    "question": "Học phí hàng năm của chương trình Business tại RMIT Vietnam là bao nhiêu?",
-    "expected_answer": "Khoảng 375.840.000 VND mỗi năm (tùy chương trình cụ thể).",
-    "expected_context": "Trang Tuition Fees, mục Undergraduate Programs"
+    "id": "Q01",
+    "topic": "thử việc",
+    "question": "Thời gian thử việc tối đa cho vị trí lập trình viên là bao lâu và lương thử việc tối thiểu bằng bao nhiêu % lương chính thức?",
+    "expected_answer": "Lập trình viên là công việc có chức danh nghề nghiệp cần trình độ chuyên môn từ cao đẳng trở lên nên thời gian thử việc không quá 60 ngày. Tiền lương thử việc do hai bên thỏa thuận nhưng ít nhất phải bằng 85% mức lương của công việc đó.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 25 khoản 2 và Điều 26"
   },
   {
-    "question": "Học phí được thanh toán theo hình thức nào?",
-    "expected_answer": "Thanh toán theo từng học kỳ, tính theo từng môn học đã đăng ký.",
-    "expected_context": "Trang Tuition Fees, mục Payment Structure"
+    "id": "Q02",
+    "topic": "sa thải",
+    "question": "Công ty sa thải tôi qua tin nhắn Zalo mà không báo trước 30 ngày thì có đúng luật không?",
+    "expected_answer": "Không đúng luật. Sa thải là hình thức xử lý kỷ luật lao động, chỉ áp dụng cho các trường hợp tại Điều 125 và bắt buộc phải theo trình tự tại Điều 122: người sử dụng lao động phải chứng minh được lỗi, phải có sự tham gia của tổ chức đại diện người lao động tại cơ sở, người lao động phải có mặt và có quyền tự bào chữa, và việc xử lý phải được ghi thành biên bản. Một tin nhắn Zalo không đáp ứng các điều kiện đó. Lưu ý thời hạn báo trước 30/45 ngày thuộc về đơn phương chấm dứt hợp đồng theo Điều 36, không phải thủ tục của sa thải.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 122 và Điều 125"
   },
   {
-    "question": "Trường có cung cấp ký túc xá trong khuôn viên không?",
-    "expected_answer": "Không — trường không cung cấp chỗ ở trong khuôn viên, nhưng có đội ngũ hỗ trợ sinh viên tìm chỗ ở gần trường.",
-    "expected_context": "Trang Accommodation Services"
+    "id": "Q03",
+    "topic": "thử việc",
+    "question": "Thử việc tối đa bao nhiêu ngày với công việc chỉ cần trình độ trung cấp?",
+    "expected_answer": "Không quá 30 ngày đối với công việc có chức danh nghề nghiệp cần trình độ chuyên môn, kỹ thuật trung cấp, công nhân kỹ thuật, nhân viên nghiệp vụ.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 25 khoản 3"
+  },
+  {
+    "id": "Q04",
+    "topic": "thử việc",
+    "question": "Công ty có được cho tôi thử việc hai lần cho cùng một vị trí không?",
+    "expected_answer": "Không. Điều 25 quy định chỉ được thử việc một lần đối với một công việc. Ngoài ra không áp dụng thử việc đối với người lao động giao kết hợp đồng lao động có thời hạn dưới 01 tháng.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 24 khoản 3 và Điều 25"
+  },
+  {
+    "id": "Q05",
+    "topic": "thử việc",
+    "question": "Đang thử việc mà tôi muốn nghỉ ngang thì có phải báo trước và bồi thường không?",
+    "expected_answer": "Không. Trong thời gian thử việc, mỗi bên có quyền hủy bỏ hợp đồng thử việc hoặc hợp đồng lao động đã giao kết mà không cần báo trước và không phải bồi thường.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 27 khoản 2"
+  },
+  {
+    "id": "Q06",
+    "topic": "làm thêm giờ",
+    "question": "Một tháng tôi bị bắt OT tối đa bao nhiêu giờ, và một năm tối đa bao nhiêu giờ?",
+    "expected_answer": "Số giờ làm thêm không quá 40 giờ trong 01 tháng và không quá 200 giờ trong 01 năm. Riêng một số ngành nghề đặc thù (dệt may, da giày, điện, điện tử, chế biến nông lâm thủy sản, cung cấp điện, viễn thông, lọc dầu, cấp thoát nước, công việc đòi hỏi trình độ chuyên môn kỹ thuật cao mà thị trường không cung ứng kịp...) thì được làm thêm không quá 300 giờ trong 01 năm.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 107 khoản 2 điểm b, c và khoản 3"
+  },
+  {
+    "id": "Q07",
+    "topic": "làm thêm giờ",
+    "question": "Công ty có được ép tôi làm thêm giờ khi tôi không đồng ý không?",
+    "expected_answer": "Không, trừ các trường hợp đặc biệt. Điều kiện đầu tiên để sử dụng người lao động làm thêm giờ là phải được sự đồng ý của người lao động. Chỉ trong trường hợp đặc biệt tại Điều 108 (thực hiện lệnh động viên bảo đảm quốc phòng an ninh; thực hiện công việc bảo vệ tính mạng con người, tài sản trong phòng ngừa, khắc phục thiên tai, hỏa hoạn, dịch bệnh nguy hiểm, thảm họa) thì người lao động không được từ chối.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 107 khoản 2 điểm a và Điều 108"
+  },
+  {
+    "id": "Q08",
+    "topic": "lương làm thêm",
+    "question": "Làm thêm giờ vào ngày nghỉ lễ thì được trả lương bằng bao nhiêu phần trăm?",
+    "expected_answer": "Ít nhất bằng 300% tiền lương, chưa kể tiền lương ngày lễ, tết, ngày nghỉ có hưởng lương đối với người lao động hưởng lương ngày. So sánh: làm thêm ngày thường ít nhất 150%, ngày nghỉ hằng tuần ít nhất 200%.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 98 khoản 1"
+  },
+  {
+    "id": "Q09",
+    "topic": "lương làm thêm",
+    "question": "Làm ca đêm được phụ cấp thêm bao nhiêu, và giờ làm việc ban đêm tính từ mấy giờ?",
+    "expected_answer": "Giờ làm việc ban đêm được tính từ 22 giờ đến 06 giờ sáng ngày hôm sau. Người lao động làm việc vào ban đêm được trả thêm ít nhất bằng 30% tiền lương của ngày làm việc bình thường. Nếu làm thêm giờ vào ban đêm thì ngoài các khoản trên còn được trả thêm 20% tiền lương.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 106 và Điều 98 khoản 2, khoản 3"
+  },
+  {
+    "id": "Q10",
+    "topic": "nghỉ phép",
+    "question": "Làm việc đủ 12 tháng trong điều kiện bình thường thì được nghỉ phép năm bao nhiêu ngày?",
+    "expected_answer": "12 ngày làm việc, hưởng nguyên lương theo hợp đồng lao động. Người chưa thành niên, người khuyết tật, người làm nghề nặng nhọc độc hại nguy hiểm được 14 ngày; người làm nghề đặc biệt nặng nhọc, độc hại, nguy hiểm được 16 ngày.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 113 khoản 1"
+  },
+  {
+    "id": "Q11",
+    "topic": "nghỉ phép",
+    "question": "Tôi mới làm được 7 tháng rồi nghỉ việc, phép năm chưa nghỉ hết có được thanh toán tiền không?",
+    "expected_answer": "Có. Người lao động làm việc chưa đủ 12 tháng thì số ngày nghỉ hằng năm được tính theo tỷ lệ tương ứng với số tháng làm việc. Trường hợp do thôi việc, bị mất việc làm mà chưa nghỉ hằng năm hoặc chưa nghỉ hết số ngày nghỉ hằng năm thì được người sử dụng lao động thanh toán tiền lương cho những ngày chưa nghỉ.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 113 khoản 2 và khoản 3"
+  },
+  {
+    "id": "Q12",
+    "topic": "nghỉ phép",
+    "question": "Tôi có được gộp phép năm của nhiều năm lại để nghỉ một lần không?",
+    "expected_answer": "Có. Người lao động có thể thỏa thuận với người sử dụng lao động để nghỉ hằng năm thành nhiều lần hoặc nghỉ gộp tối đa 03 năm một lần.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 113 khoản 4"
+  },
+  {
+    "id": "Q13",
+    "topic": "nghỉ việc riêng",
+    "question": "Tôi kết hôn thì được nghỉ mấy ngày hưởng nguyên lương?",
+    "expected_answer": "Nghỉ 03 ngày hưởng nguyên lương và phải thông báo với người sử dụng lao động. Con đẻ, con nuôi kết hôn thì nghỉ 01 ngày; cha mẹ đẻ, cha mẹ nuôi (của mình hoặc của vợ/chồng), vợ hoặc chồng, con đẻ, con nuôi chết thì nghỉ 03 ngày.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 115 khoản 1"
+  },
+  {
+    "id": "Q14",
+    "topic": "sa thải",
+    "question": "Tự ý bỏ việc bao nhiêu ngày thì bị sa thải?",
+    "expected_answer": "Người lao động tự ý bỏ việc 05 ngày cộng dồn trong thời hạn 30 ngày, hoặc 20 ngày cộng dồn trong thời hạn 365 ngày tính từ ngày đầu tiên tự ý bỏ việc mà không có lý do chính đáng, thì bị áp dụng hình thức kỷ luật sa thải. Lý do chính đáng gồm thiên tai, hỏa hoạn, bản thân hoặc thân nhân bị ốm có xác nhận của cơ sở khám chữa bệnh có thẩm quyền và các trường hợp khác quy định trong nội quy lao động.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 125 khoản 4"
+  },
+  {
+    "id": "Q15",
+    "topic": "sa thải",
+    "question": "Tôi đang mang thai thì công ty có được xử lý kỷ luật sa thải tôi không?",
+    "expected_answer": "Không. Không được xử lý kỷ luật lao động đối với người lao động nữ đang mang thai, đang nghỉ thai sản hoặc nuôi con dưới 12 tháng tuổi. Ngoài ra cũng không được xử lý kỷ luật khi người lao động đang nghỉ ốm đau, điều dưỡng, nghỉ việc được sự đồng ý của người sử dụng lao động, đang bị tạm giữ tạm giam, hoặc đang chờ kết quả điều tra xác minh.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 122 khoản 4"
+  },
+  {
+    "id": "Q16",
+    "topic": "chấm dứt hợp đồng",
+    "question": "Tôi ký hợp đồng xác định thời hạn 24 tháng, muốn nghỉ việc thì phải báo trước bao nhiêu ngày?",
+    "expected_answer": "Ít nhất 30 ngày, vì hợp đồng lao động xác định thời hạn từ 12 tháng đến 36 tháng phải báo trước ít nhất 30 ngày. Hợp đồng không xác định thời hạn phải báo trước ít nhất 45 ngày; hợp đồng dưới 12 tháng thì ít nhất 03 ngày làm việc.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 35 khoản 1"
+  },
+  {
+    "id": "Q17",
+    "topic": "chấm dứt hợp đồng",
+    "question": "Công ty chậm trả lương thì tôi có được nghỉ việc ngay mà không cần báo trước không?",
+    "expected_answer": "Có. Người lao động có quyền đơn phương chấm dứt hợp đồng lao động không cần báo trước khi không được trả đủ lương hoặc trả lương không đúng thời hạn, trừ trường hợp bất khả kháng quy định tại khoản 4 Điều 97. Các trường hợp khác được nghỉ ngay gồm: không được bố trí đúng công việc/địa điểm/điều kiện làm việc đã thỏa thuận, bị ngược đãi hoặc cưỡng bức lao động, bị quấy rối tình dục tại nơi làm việc, lao động nữ mang thai phải nghỉ việc theo chỉ định, đủ tuổi nghỉ hưu, hoặc người sử dụng lao động cung cấp thông tin không trung thực khi giao kết hợp đồng.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 35 khoản 2"
+  },
+  {
+    "id": "Q18",
+    "topic": "chấm dứt hợp đồng trái luật",
+    "question": "Nếu công ty đơn phương chấm dứt hợp đồng trái luật thì phải bồi thường cho tôi những gì?",
+    "expected_answer": "Công ty phải nhận người lao động trở lại làm việc theo hợp đồng đã giao kết; trả tiền lương, đóng bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp trong những ngày người lao động không được làm việc; và trả thêm một khoản ít nhất bằng 02 tháng tiền lương theo hợp đồng lao động. Nếu vi phạm thời hạn báo trước thì phải trả thêm khoản tiền tương ứng tiền lương những ngày không báo trước. Nếu người lao động không muốn làm tiếp thì được trả thêm trợ cấp thôi việc theo Điều 46; nếu công ty không muốn nhận lại và người lao động đồng ý thì hai bên thỏa thuận khoản bồi thường thêm ít nhất bằng 02 tháng tiền lương.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 41"
+  },
+  {
+    "id": "Q19",
+    "topic": "lương tối thiểu",
+    "question": "Mức lương tối thiểu tháng của vùng I hiện nay là bao nhiêu?",
+    "expected_answer": "Mức lương tối thiểu tháng vùng I là 5.310.000 đồng/tháng và mức lương tối thiểu giờ là 25.500 đồng/giờ. Các vùng còn lại: vùng II là 4.730.000 đồng/tháng (22.700 đồng/giờ), vùng III là 4.140.000 đồng/tháng (20.000 đồng/giờ), vùng IV là 3.700.000 đồng/tháng (17.800 đồng/giờ).",
+    "expected_context": "Nghị định 293/2025/NĐ-CP, Điều 3 khoản 1"
+  },
+  {
+    "id": "Q20",
+    "topic": "loại hợp đồng",
+    "question": "Hợp đồng xác định thời hạn được ký tối đa mấy lần trước khi phải chuyển sang hợp đồng không xác định thời hạn?",
+    "expected_answer": "Hợp đồng lao động xác định thời hạn có thời hạn không quá 36 tháng và chỉ được ký thêm 01 lần; sau đó nếu người lao động vẫn tiếp tục làm việc thì phải ký hợp đồng lao động không xác định thời hạn. Ngoài ra, nếu hết hạn hợp đồng mà người lao động vẫn làm việc và sau 30 ngày hai bên không ký hợp đồng mới thì hợp đồng đã giao kết trở thành hợp đồng không xác định thời hạn.",
+    "expected_context": "Bộ luật Lao động 2019, Điều 20"
   }
 ]

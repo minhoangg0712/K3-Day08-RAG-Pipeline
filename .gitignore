@@ -18,6 +18,11 @@ data/_tmp_pdf/
 pageindex_doc_ids.json
 pageindex_pdfs/
 
+# Vector store — sinh lại bằng `python -m src.task4_chunking_indexing`.
+# Không commit: chroma.sqlite3 nặng ~13MB và ghi đè toàn bộ mỗi lần reindex,
+# nên mỗi lần index lại sẽ thêm một blob 13MB vào history repo chung.
+chroma_db/
+
 # IDE
 .vscode/
 .idea/

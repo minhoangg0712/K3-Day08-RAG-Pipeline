@@ -1,0 +1,660 @@
+{
+  "A_hybrid_rrf": {
+    "label": "Hybrid (Dense + BM25) + RRF",
+    "description": "semantic_search (bge-m3, cosine) + lexical_search (BM25) → rerank_rrf(k=60) → fallback PageIndex khi cosine gốc < 0.48",
+    "offline": {
+      "hit_rate": 0.65,
+      "article_recall": 0.6,
+      "article_precision": 0.2667,
+      "mrr": 0.5,
+      "n_questions": 20,
+      "per_item": [
+        {
+          "id": "Q01",
+          "topic": "thử việc",
+          "question": "Thời gian thử việc tối đa cho vị trí lập trình viên là bao lâu và lương thử việc tối thiểu bằng bao nhiêu % lương chính thức?",
+          "expected_articles": [
+            "25",
+            "26"
+          ],
+          "retrieved_articles": [
+            "25",
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.6667,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q02",
+          "topic": "sa thải",
+          "question": "Công ty sa thải tôi qua tin nhắn Zalo mà không báo trước 30 ngày thì có đúng luật không?",
+          "expected_articles": [
+            "122",
+            "125"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q03",
+          "topic": "thử việc",
+          "question": "Thử việc tối đa bao nhiêu ngày với công việc chỉ cần trình độ trung cấp?",
+          "expected_articles": [
+            "25"
+          ],
+          "retrieved_articles": [
+            "25",
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q04",
+          "topic": "thử việc",
+          "question": "Công ty có được cho tôi thử việc hai lần cho cùng một vị trí không?",
+          "expected_articles": [
+            "24",
+            "25"
+          ],
+          "retrieved_articles": [
+            "25",
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 0.5,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q05",
+          "topic": "thử việc",
+          "question": "Đang thử việc mà tôi muốn nghỉ ngang thì có phải báo trước và bồi thường không?",
+          "expected_articles": [
+            "27"
+          ],
+          "retrieved_articles": [
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.3333
+        },
+        {
+          "id": "Q06",
+          "topic": "làm thêm giờ",
+          "question": "Một tháng tôi bị bắt OT tối đa bao nhiêu giờ, và một năm tối đa bao nhiêu giờ?",
+          "expected_articles": [
+            "107"
+          ],
+          "retrieved_articles": [
+            "105",
+            "106"
+          ],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q07",
+          "topic": "làm thêm giờ",
+          "question": "Công ty có được ép tôi làm thêm giờ khi tôi không đồng ý không?",
+          "expected_articles": [
+            "107",
+            "108"
+          ],
+          "retrieved_articles": [
+            "107",
+            "59",
+            "60"
+          ],
+          "hit": 1.0,
+          "article_recall": 0.5,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q08",
+          "topic": "lương làm thêm",
+          "question": "Làm thêm giờ vào ngày nghỉ lễ thì được trả lương bằng bao nhiêu phần trăm?",
+          "expected_articles": [
+            "98"
+          ],
+          "retrieved_articles": [
+            "98"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.3333
+        },
+        {
+          "id": "Q09",
+          "topic": "lương làm thêm",
+          "question": "Làm ca đêm được phụ cấp thêm bao nhiêu, và giờ làm việc ban đêm tính từ mấy giờ?",
+          "expected_articles": [
+            "106",
+            "98"
+          ],
+          "retrieved_articles": [
+            "106",
+            "107",
+            "56",
+            "57",
+            "98"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.6667,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q10",
+          "topic": "nghỉ phép",
+          "question": "Làm việc đủ 12 tháng trong điều kiện bình thường thì được nghỉ phép năm bao nhiêu ngày?",
+          "expected_articles": [
+            "113"
+          ],
+          "retrieved_articles": [
+            "113"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.5
+        },
+        {
+          "id": "Q11",
+          "topic": "nghỉ phép",
+          "question": "Tôi mới làm được 7 tháng rồi nghỉ việc, phép năm chưa nghỉ hết có được thanh toán tiền không?",
+          "expected_articles": [
+            "113"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q12",
+          "topic": "nghỉ phép",
+          "question": "Tôi có được gộp phép năm của nhiều năm lại để nghỉ một lần không?",
+          "expected_articles": [
+            "113"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q13",
+          "topic": "nghỉ việc riêng",
+          "question": "Tôi kết hôn thì được nghỉ mấy ngày hưởng nguyên lương?",
+          "expected_articles": [
+            "115"
+          ],
+          "retrieved_articles": [
+            "111",
+            "112",
+            "115"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q14",
+          "topic": "sa thải",
+          "question": "Tự ý bỏ việc bao nhiêu ngày thì bị sa thải?",
+          "expected_articles": [
+            "125"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q15",
+          "topic": "sa thải",
+          "question": "Tôi đang mang thai thì công ty có được xử lý kỷ luật sa thải tôi không?",
+          "expected_articles": [
+            "122"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q16",
+          "topic": "chấm dứt hợp đồng",
+          "question": "Tôi ký hợp đồng xác định thời hạn 24 tháng, muốn nghỉ việc thì phải báo trước bao nhiêu ngày?",
+          "expected_articles": [
+            "35"
+          ],
+          "retrieved_articles": [
+            "35"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.5
+        },
+        {
+          "id": "Q17",
+          "topic": "chấm dứt hợp đồng",
+          "question": "Công ty chậm trả lương thì tôi có được nghỉ việc ngay mà không cần báo trước không?",
+          "expected_articles": [
+            "35"
+          ],
+          "retrieved_articles": [
+            "98"
+          ],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q18",
+          "topic": "chấm dứt hợp đồng trái luật",
+          "question": "Nếu công ty đơn phương chấm dứt hợp đồng trái luật thì phải bồi thường cho tôi những gì?",
+          "expected_articles": [
+            "41"
+          ],
+          "retrieved_articles": [
+            "39",
+            "40",
+            "41"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q19",
+          "topic": "lương tối thiểu",
+          "question": "Mức lương tối thiểu tháng của vùng I hiện nay là bao nhiêu?",
+          "expected_articles": [
+            "3"
+          ],
+          "retrieved_articles": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.6667,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q20",
+          "topic": "loại hợp đồng",
+          "question": "Hợp đồng xác định thời hạn được ký tối đa mấy lần trước khi phải chuyển sang hợp đồng không xác định thời hạn?",
+          "expected_articles": [
+            "20"
+          ],
+          "retrieved_articles": [
+            "20",
+            "21"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.3333
+        }
+      ]
+    },
+    "ragas": null
+  },
+  "B_dense_only": {
+    "label": "Dense-only (baseline)",
+    "description": "Chỉ semantic_search trên ChromaDB, không BM25, không RRF",
+    "offline": {
+      "hit_rate": 0.6,
+      "article_recall": 0.55,
+      "article_precision": 0.2333,
+      "mrr": 0.475,
+      "n_questions": 20,
+      "per_item": [
+        {
+          "id": "Q01",
+          "topic": "thử việc",
+          "question": "Thời gian thử việc tối đa cho vị trí lập trình viên là bao lâu và lương thử việc tối thiểu bằng bao nhiêu % lương chính thức?",
+          "expected_articles": [
+            "25",
+            "26"
+          ],
+          "retrieved_articles": [
+            "25",
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.6667,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q02",
+          "topic": "sa thải",
+          "question": "Công ty sa thải tôi qua tin nhắn Zalo mà không báo trước 30 ngày thì có đúng luật không?",
+          "expected_articles": [
+            "122",
+            "125"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q03",
+          "topic": "thử việc",
+          "question": "Thử việc tối đa bao nhiêu ngày với công việc chỉ cần trình độ trung cấp?",
+          "expected_articles": [
+            "25"
+          ],
+          "retrieved_articles": [
+            "25",
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q04",
+          "topic": "thử việc",
+          "question": "Công ty có được cho tôi thử việc hai lần cho cùng một vị trí không?",
+          "expected_articles": [
+            "24",
+            "25"
+          ],
+          "retrieved_articles": [
+            "10",
+            "25",
+            "26",
+            "27"
+          ],
+          "hit": 1.0,
+          "article_recall": 0.5,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q05",
+          "topic": "thử việc",
+          "question": "Đang thử việc mà tôi muốn nghỉ ngang thì có phải báo trước và bồi thường không?",
+          "expected_articles": [
+            "27"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q06",
+          "topic": "làm thêm giờ",
+          "question": "Một tháng tôi bị bắt OT tối đa bao nhiêu giờ, và một năm tối đa bao nhiêu giờ?",
+          "expected_articles": [
+            "107"
+          ],
+          "retrieved_articles": [
+            "105",
+            "106",
+            "111"
+          ],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q07",
+          "topic": "làm thêm giờ",
+          "question": "Công ty có được ép tôi làm thêm giờ khi tôi không đồng ý không?",
+          "expected_articles": [
+            "107",
+            "108"
+          ],
+          "retrieved_articles": [
+            "108"
+          ],
+          "hit": 1.0,
+          "article_recall": 0.5,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q08",
+          "topic": "lương làm thêm",
+          "question": "Làm thêm giờ vào ngày nghỉ lễ thì được trả lương bằng bao nhiêu phần trăm?",
+          "expected_articles": [
+            "98"
+          ],
+          "retrieved_articles": [
+            "98"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.5
+        },
+        {
+          "id": "Q09",
+          "topic": "lương làm thêm",
+          "question": "Làm ca đêm được phụ cấp thêm bao nhiêu, và giờ làm việc ban đêm tính từ mấy giờ?",
+          "expected_articles": [
+            "106",
+            "98"
+          ],
+          "retrieved_articles": [
+            "106",
+            "107",
+            "56",
+            "57",
+            "98"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.6667,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q10",
+          "topic": "nghỉ phép",
+          "question": "Làm việc đủ 12 tháng trong điều kiện bình thường thì được nghỉ phép năm bao nhiêu ngày?",
+          "expected_articles": [
+            "113"
+          ],
+          "retrieved_articles": [
+            "113"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.3333
+        },
+        {
+          "id": "Q11",
+          "topic": "nghỉ phép",
+          "question": "Tôi mới làm được 7 tháng rồi nghỉ việc, phép năm chưa nghỉ hết có được thanh toán tiền không?",
+          "expected_articles": [
+            "113"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q12",
+          "topic": "nghỉ phép",
+          "question": "Tôi có được gộp phép năm của nhiều năm lại để nghỉ một lần không?",
+          "expected_articles": [
+            "113"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q13",
+          "topic": "nghỉ việc riêng",
+          "question": "Tôi kết hôn thì được nghỉ mấy ngày hưởng nguyên lương?",
+          "expected_articles": [
+            "115"
+          ],
+          "retrieved_articles": [
+            "115"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q14",
+          "topic": "sa thải",
+          "question": "Tự ý bỏ việc bao nhiêu ngày thì bị sa thải?",
+          "expected_articles": [
+            "125"
+          ],
+          "retrieved_articles": [],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q15",
+          "topic": "sa thải",
+          "question": "Tôi đang mang thai thì công ty có được xử lý kỷ luật sa thải tôi không?",
+          "expected_articles": [
+            "122"
+          ],
+          "retrieved_articles": [
+            "123"
+          ],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q16",
+          "topic": "chấm dứt hợp đồng",
+          "question": "Tôi ký hợp đồng xác định thời hạn 24 tháng, muốn nghỉ việc thì phải báo trước bao nhiêu ngày?",
+          "expected_articles": [
+            "35"
+          ],
+          "retrieved_articles": [
+            "35"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.3333
+        },
+        {
+          "id": "Q17",
+          "topic": "chấm dứt hợp đồng",
+          "question": "Công ty chậm trả lương thì tôi có được nghỉ việc ngay mà không cần báo trước không?",
+          "expected_articles": [
+            "35"
+          ],
+          "retrieved_articles": [
+            "98"
+          ],
+          "hit": 0.0,
+          "article_recall": 0.0,
+          "article_precision": 0.0,
+          "mrr": 0.0
+        },
+        {
+          "id": "Q18",
+          "topic": "chấm dứt hợp đồng trái luật",
+          "question": "Nếu công ty đơn phương chấm dứt hợp đồng trái luật thì phải bồi thường cho tôi những gì?",
+          "expected_articles": [
+            "41"
+          ],
+          "retrieved_articles": [
+            "39",
+            "40",
+            "41"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q19",
+          "topic": "lương tối thiểu",
+          "question": "Mức lương tối thiểu tháng của vùng I hiện nay là bao nhiêu?",
+          "expected_articles": [
+            "3"
+          ],
+          "retrieved_articles": [
+            "3",
+            "4",
+            "96"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 1.0
+        },
+        {
+          "id": "Q20",
+          "topic": "loại hợp đồng",
+          "question": "Hợp đồng xác định thời hạn được ký tối đa mấy lần trước khi phải chuyển sang hợp đồng không xác định thời hạn?",
+          "expected_articles": [
+            "20"
+          ],
+          "retrieved_articles": [
+            "20",
+            "21"
+          ],
+          "hit": 1.0,
+          "article_recall": 1.0,
+          "article_precision": 0.3333,
+          "mrr": 0.3333
+        }
+      ]
+    },
+    "ragas": null
+  }
+}

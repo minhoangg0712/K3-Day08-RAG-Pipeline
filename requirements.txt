@@ -11,7 +11,7 @@ markitdown[pdf]>=0.1.0
 fpdf2>=2.7.0
 
 # Task 4 - Chunking & Indexing
-langchain-text-splitters>=0.2.0
+langchain-text-splitters>=0.3.0,<1.0
 sentence-transformers>=2.2.0
 chromadb>=0.5.0
 
@@ -28,10 +28,20 @@ openai>=1.30.0
 # Group project - UI
 streamlit>=1.35.0
 
-# Group project - Evaluation
-ragas==0.1.21
+# Group project - Evaluation (RAGAS)
+#
+# Phải ghim cả ngăn xếp LangChain về nhánh 0.3, KHÔNG nâng lên 1.x:
+# ragas import `langchain_community.chat_models.vertexai`, mà module này đã bị gỡ
+# khỏi langchain-community 0.4 — cài bản mới sẽ gãy ngay tại `import ragas` với
+# ModuleNotFoundError. Nếu pip cảnh báo xung đột với langgraph / langchain-classic
+# thì bỏ qua được: bài lab không dùng hai gói đó.
+ragas==0.2.15
 datasets>=2.14.0
-langchain-openai>=0.1.0
+langchain-core>=0.3.0,<1.0
+langchain-community>=0.3.0,<0.4
+langchain-openai>=0.3.0,<1.0
+langchain-huggingface>=0.3.0,<1.0
+pandas>=2.0.0
 
-# Testing (dung de cham diem bai ca nhan)
+# Testing (dung de cham diem)
 pytest>=7.0.0
