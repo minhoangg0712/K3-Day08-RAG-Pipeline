@@ -41,8 +41,14 @@ TEMPERATURE = 0.1
 
 MAX_TOKENS = 1000
 
-# Model mặc định :free để cả nhóm chạy được khi chưa có credit
-LLM_MODEL = os.getenv("LLM_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
+# Model mặc định :free để cả nhóm chạy được khi chưa có credit.
+# Đã thử qua 7 model free trên OpenRouter (04/08/2026):
+#   - llama-3.3-70b:free       → 404, không còn miễn phí
+#   - gemma-4-31b-it:free      → 429, provider quá tải
+#   - nemotron-3-super-120b    → chạy được nhưng in cả chuỗi suy luận ra output
+#   - ling-3.0-flash, laguna-s, gpt-oss-20b → trả content rỗng
+#   - gemma-4-26b-a4b-it:free  → sạch, tiếng Việt tốt, trả lời đúng ✓
+LLM_MODEL = os.getenv("LLM_MODEL", "google/gemma-4-26b-a4b-it:free")
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

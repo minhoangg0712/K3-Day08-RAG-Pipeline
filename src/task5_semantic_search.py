@@ -32,7 +32,7 @@ except ImportError:  # Task 4 chưa xong
 
 # Model sinh câu trả lời giả định cho HyDE. Dùng bản :free của OpenRouter vì
 # HyDE gọi LLM ở MỌI truy vấn — chi phí cộng dồn rất nhanh nếu dùng model trả phí.
-HYDE_MODEL = os.getenv("HYDE_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
+HYDE_MODEL = os.getenv("HYDE_MODEL", "google/gemma-4-26b-a4b-it:free")
 
 
 # =============================================================================
