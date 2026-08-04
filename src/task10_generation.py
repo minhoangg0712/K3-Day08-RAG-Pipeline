@@ -1,199 +1,276 @@
 """
 Task 10 — Generation Có Citation.
 
-Hướng dẫn:
-    1. Chọn top_k, top_p phù hợp (giải thích lý do)
-    2. Sắp xếp lại chunks sau reranking để tránh "lost in the middle"
-    3. Inject context vào prompt
-    4. Yêu cầu LLM trả lời có citation
-    5. Nếu không đủ evidence → "I cannot verify this information"
+Luồng: retrieve (Task 9) → reorder chống lost-in-the-middle → format context có
+nguồn → gọi LLM → câu trả lời kèm trích dẫn.
 
-Gợi ý LLM: OpenRouter có nhiều model gắn hậu tố ":free" không tính phí — xem
-https://openrouter.ai/models?max_price=0 — phù hợp nếu chưa có credit trả phí.
-Base URL: "https://openrouter.ai/api/v1", dùng chung interface với OpenAI SDK.
+LLM: OpenRouter (dùng chung interface với OpenAI SDK). Nhiều model hậu tố ":free"
+không tính phí — https://openrouter.ai/models?max_price=0
+
+Chạy:
+    python -m src.task10_generation
 """
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from .task9_retrieval_pipeline import retrieve
+from src.task9_retrieval_pipeline import retrieve
 
 
 # =============================================================================
-# CONFIGURATION — Giải thích lựa chọn
+# CONFIGURATION
 # =============================================================================
 
-# top_k: Số chunks đưa vào context
-# Chọn 5 vì: đủ evidence mà không quá dài gây lost in the middle
+# Số chunk đưa vào context. 5 là điểm cân bằng: đủ dẫn chứng để trả lời một câu
+# hỏi pháp luật (thường cần cả điều luật gốc lẫn nghị định hướng dẫn), nhưng
+# chưa dài tới mức LLM bắt đầu bỏ sót phần giữa.
 TOP_K = 5
 
-# top_p (nucleus sampling): Xác suất tích luỹ cho token generation
-# Chọn 0.9 vì: đủ diverse nhưng không quá random
+# top_p = 0.9: cắt bớt đuôi phân phối, loại các token rất ít khả năng. Với hỏi
+# đáp pháp luật, phần đuôi đó chính là chỗ mô hình bịa ra số điều luật không tồn
+# tại — cắt đi thì an toàn hơn mà không làm câu văn cứng.
 TOP_P = 0.9
 
-# temperature: Độ ngẫu nhiên của output
-# Chọn 0.3 vì: RAG cần factual, ít sáng tạo
-TEMPERATURE = 0.3
+# temperature = 0.1: gần như tất định. Đây là tra cứu pháp luật, không phải viết
+# sáng tạo — cùng một câu hỏi phải cho cùng một câu trả lời. Skeleton để 0.3,
+# hạ xuống 0.1 vì mỗi độ ngẫu nhiên thêm vào đều là thêm rủi ro sai điều luật.
+TEMPERATURE = 0.1
 
-# TODO: Chọn LLM model (OpenRouter model ID)
-LLM_MODEL = "openai/gpt-4o-mini"  # hoặc model ":free" nếu chưa có credit
+MAX_TOKENS = 1000
+
+# Model mặc định :free để cả nhóm chạy được khi chưa có credit
+LLM_MODEL = os.getenv("LLM_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+NO_EVIDENCE_MESSAGE = (
+    "Tôi không thể xác minh thông tin này từ các văn bản pháp luật hiện có "
+    "trong cơ sở dữ liệu."
+)
 
 
 # =============================================================================
 # SYSTEM PROMPT
 # =============================================================================
 
-SYSTEM_PROMPT = """Bạn là trợ lý trả lời câu hỏi về dịch vụ và chính sách đại học
-(học phí, học bổng, ký túc xá, thư viện, đăng ký học phần).
+SYSTEM_PROMPT = """Bạn là trợ lý hỏi đáp pháp luật lao động Việt Nam, phục vụ
+người lao động trẻ (thử việc, làm thêm giờ, nghỉ phép, hợp đồng, sa thải).
 
-Quy tắc bắt buộc:
-1. Chỉ sử dụng thông tin từ context được cung cấp — KHÔNG bịa đặt
-2. Mỗi khẳng định phải có trích dẫn ngay sau, ví dụ: [Tuition Fees, 2026]
-3. Nếu context không đủ thông tin → trả lời: "Tôi không thể xác minh thông tin này từ nguồn hiện có"
-4. Trả lời bằng tiếng Việt, có cấu trúc rõ ràng theo đoạn văn
-5. Không suy luận hay mở rộng ngoài những gì được nêu trong context"""
+QUY TẮC BẮT BUỘC:
+
+1. CHỈ trả lời dựa trên phần NGỮ CẢNH được cung cấp bên dưới. Không dùng kiến
+   thức bên ngoài, kể cả khi bạn chắc chắn về nó.
+
+2. Sau mỗi khẳng định, chèn ngay trích dẫn dạng [Tên nguồn, Điều/Khoản]:
+       "Thời gian thử việc không quá 60 ngày đối với công việc cần trình độ cao
+       đẳng trở lên [Bộ luật Lao động 2019, Điều 25]."
+
+3. Nếu ngữ cảnh KHÔNG chứa đủ căn cứ, trả lời đúng câu sau và không suy đoán:
+       "{no_evidence}"
+
+4. Không bịa số hiệu điều luật, nghị định hay mức phạt. Chỉ nêu con số xuất hiện
+   trong ngữ cảnh.
+
+5. Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu với người không học luật. Giải
+   thích thuật ngữ pháp lý khi lần đầu dùng.
+
+6. Nếu vấn đề còn phụ thuộc tình tiết cụ thể, nói rõ điều đó thay vì kết luận
+   chắc chắn."""
 
 
 # =============================================================================
-# DOCUMENT REORDERING (tránh lost in the middle)
+# Reordering — chống "lost in the middle"
 # =============================================================================
 
 def reorder_for_llm(chunks: list[dict]) -> list[dict]:
     """
-    Sắp xếp chunks để tránh "lost in the middle" effect.
+    Sắp xếp lại chunk: quan trọng nhất ở ĐẦU và CUỐI, ít quan trọng vào GIỮA.
 
-    LLM nhớ tốt thông tin ở ĐẦU và CUỐI prompt, quên thông tin ở GIỮA.
-    Strategy: đặt chunks quan trọng nhất ở đầu và cuối, kém quan trọng ở giữa.
+    Cơ sở: Liu et al. (2023), "Lost in the Middle". LLM nhớ tốt thông tin ở đầu
+    và cuối context, còn phần giữa thì độ chính xác tụt rõ rệt — đường cong hình
+    chữ U. Nếu cứ xếp theo thứ hạng giảm dần thì chunk hạng 2, 3 (vẫn rất liên
+    quan) lại rơi đúng vào vùng mù đó.
 
-    Input order (by score):  [1, 2, 3, 4, 5]
-    Output order:            [1, 3, 5, 4, 2]
-    (best first, worst in middle, second-best last)
+    Cách xếp: [1, 3, 5, 4, 2] thay vì [1, 2, 3, 4, 5]
+        - chunk lẻ (0,2,4...) xếp xuôi ở nửa đầu
+        - chunk chẵn (1,3...) xếp ngược ở nửa sau
+    Nhờ vậy hạng 1 nằm đầu, hạng 2 nằm cuối — hai vị trí LLM đọc kỹ nhất.
 
     Args:
-        chunks: List sorted by score descending (from retrieval)
+        chunks: List chunk đã sắp theo độ liên quan giảm dần
 
     Returns:
-        List reordered để maximize LLM attention.
+        List cùng độ dài, đã đảo vị trí.
     """
-    # TODO: Implement reordering
-    #
-    # if len(chunks) <= 2:
-    #     return chunks
-    #
-    # front = chunks[::2]   # index 0, 2, 4 -> đặt ở đầu
-    # back = chunks[1::2]   # index 1, 3    -> đặt ở cuối (reversed)
-    # return front + back[::-1]
-    raise NotImplementedError("Implement reorder_for_llm")
+    if len(chunks) <= 2:
+        return list(chunks)
+
+    front = chunks[0::2]          # hạng 1, 3, 5, ...
+    back = chunks[1::2][::-1]     # hạng ..., 4, 2
+    return front + back
 
 
 # =============================================================================
-# CONTEXT FORMATTING
+# Format context
 # =============================================================================
 
 def format_context(chunks: list[dict]) -> str:
     """
-    Format chunks thành context string cho prompt.
-    Mỗi chunk có label source để LLM có thể cite.
+    Ghép chunk thành khối ngữ cảnh, mỗi khối gắn nhãn nguồn.
 
-    Args:
-        chunks: List of {'content': str, 'metadata': dict, 'score': float}
-
-    Returns:
-        Formatted context string.
+    Nhãn nguồn phải nằm NGAY CẠNH nội dung, không gom thành danh sách ở cuối:
+    LLM cần biết câu nào thuộc văn bản nào ngay tại chỗ nó đang đọc thì mới trích
+    dẫn đúng. Gom nguồn ra chỗ khác là mời mô hình gán nhầm trích dẫn.
     """
-    # TODO: Implement context formatting
-    #
-    # context_parts = []
-    # for i, chunk in enumerate(chunks, 1):
-    #     source = chunk.get("metadata", {}).get("source", f"Source {i}")
-    #     doc_type = chunk.get("metadata", {}).get("type", "unknown")
-    #     context_parts.append(
-    #         f"[Document {i} | Source: {source} | Type: {doc_type}]\n"
-    #         f"{chunk['content']}\n"
-    #     )
-    # return "\n---\n".join(context_parts)
-    raise NotImplementedError("Implement format_context")
+    if not chunks:
+        return ""
+
+    blocks = []
+    for i, chunk in enumerate(chunks, 1):
+        meta = chunk.get("metadata", {}) or {}
+        source = meta.get("source", "không rõ nguồn")
+        section = meta.get("section", "")
+        doc_type = meta.get("type", "")
+
+        label = f"[Nguồn {i}: {source}"
+        if section:
+            label += f" — {section}"
+        if doc_type:
+            label += f" ({'văn bản luật' if doc_type == 'legal' else 'bài tư vấn'})"
+        label += "]"
+
+        blocks.append(f"{label}\n{chunk.get('content', '').strip()}")
+
+    return "\n\n---\n\n".join(blocks)
 
 
 # =============================================================================
-# GENERATION
+# Gọi LLM
 # =============================================================================
 
-def generate_with_citation(query: str, top_k: int = TOP_K) -> dict:
-    """
-    End-to-end RAG generation có citation.
+def _get_llm_client():
+    """Tạo client LLM. Ưu tiên OpenRouter, lùi về OpenAI."""
+    from openai import OpenAI
 
-    Pipeline:
-        1. Retrieve relevant chunks
-        2. Reorder để tránh lost in the middle
-        3. Format context với source labels
-        4. Build prompt (system + context + query)
-        5. Call LLM
-        6. Return answer + sources
+    if OPENROUTER_API_KEY:
+        return OpenAI(
+            api_key=OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
+        ), LLM_MODEL
+
+    if OPENAI_API_KEY:
+        return OpenAI(api_key=OPENAI_API_KEY), os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+    raise RuntimeError(
+        "Chưa có OPENROUTER_API_KEY (hoặc OPENAI_API_KEY) trong .env — "
+        "không gọi được LLM. Tạo file .env từ .env.example và điền key."
+    )
+
+
+def generate_with_citation(
+    query: str,
+    context_chunks: list[dict] | None = None,
+    top_k: int = TOP_K,
+) -> dict:
+    """
+    Sinh câu trả lời có trích dẫn nguồn.
 
     Args:
-        query: Câu hỏi của user
+        query: Câu hỏi
+        context_chunks: Chunk ngữ cảnh. Bỏ trống thì tự gọi retrieve() (Task 9).
+        top_k: Số chunk dùng khi phải tự retrieve
 
     Returns:
         {
-            'answer': str,           # Câu trả lời có citation
-            'sources': list[dict],   # Các chunks đã dùng
-            'retrieval_source': str  # 'hybrid' hoặc 'pageindex'
+            'answer': str,
+            'sources': list[dict],      # chunk đã dùng, theo thứ tự liên quan
+            'context_used': int,
+            'model': str,
+            'reordered': bool
         }
     """
-    # TODO: Implement generation pipeline
-    #
-    # # Step 1: Retrieve
-    # chunks = retrieve(query, top_k=top_k)
-    #
-    # # Step 2: Reorder
-    # reordered = reorder_for_llm(chunks)
-    #
-    # # Step 3: Format context
-    # context = format_context(reordered)
-    #
-    # # Step 4: Build prompt
-    # user_message = f"""Context:\n{context}\n\n---\n\nQuestion: {query}"""
-    #
-    # # Step 5: Call LLM (OpenRouter — OpenAI-compatible API)
-    # from openai import OpenAI
-    # api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-    # client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
-    #
-    # response = client.chat.completions.create(
-    #     model=LLM_MODEL,
-    #     messages=[
-    #         {"role": "system", "content": SYSTEM_PROMPT},
-    #         {"role": "user", "content": user_message}
-    #     ],
-    #     temperature=TEMPERATURE,
-    #     top_p=TOP_P,
-    # )
-    #
-    # answer = response.choices[0].message.content
-    #
-    # # Step 6: Return
-    # return {
-    #     "answer": answer,
-    #     "sources": chunks,
-    #     "retrieval_source": chunks[0].get("source", "hybrid") if chunks else "none"
-    # }
-    raise NotImplementedError("Implement generate_with_citation")
+    if context_chunks is None:
+        context_chunks = retrieve(query, top_k=top_k)
+
+    if not context_chunks:
+        return {
+            "answer": NO_EVIDENCE_MESSAGE,
+            "sources": [],
+            "context_used": 0,
+            "model": None,
+            "reordered": False,
+        }
+
+    # Đảo vị trí TRƯỚC khi ghép prompt, nhưng 'sources' trả về vẫn giữ thứ tự
+    # liên quan giảm dần — người dùng đọc danh sách nguồn muốn thấy cái liên
+    # quan nhất đứng đầu, còn thứ tự đảo chỉ phục vụ cách LLM đọc context.
+    reordered = reorder_for_llm(context_chunks)
+    context = format_context(reordered)
+
+    client, model = _get_llm_client()
+
+    user_prompt = f"""NGỮ CẢNH:
+
+{context}
+
+---
+
+CÂU HỎI: {query}
+
+Trả lời dựa trên ngữ cảnh trên, kèm trích dẫn nguồn cho từng khẳng định."""
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system",
+             "content": SYSTEM_PROMPT.format(no_evidence=NO_EVIDENCE_MESSAGE)},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=TEMPERATURE,
+        top_p=TOP_P,
+        max_tokens=MAX_TOKENS,
+    )
+
+    answer = (response.choices[0].message.content or "").strip()
+
+    return {
+        "answer": answer or NO_EVIDENCE_MESSAGE,
+        "sources": context_chunks,
+        "context_used": len(context_chunks),
+        "model": model,
+        "reordered": True,
+    }
 
 
 if __name__ == "__main__":
-    test_queries = [
-        "Học phí tại RMIT Vietnam là bao nhiêu?",
-        "Làm sao để đặt phòng học nhóm ở thư viện?",
-        "Sinh viên quốc tế có những học bổng nào?",
-    ]
+    print("=" * 66)
+    print("Task 10: Generation có Citation")
+    print("=" * 66)
 
-    for q in test_queries:
-        print(f"\n{'='*70}")
-        print(f"Q: {q}")
-        print("=" * 70)
-        result = generate_with_citation(q)
-        print(f"\nA: {result['answer']}")
-        print(f"\n[Sources: {len(result['sources'])} chunks | via {result['retrieval_source']}]")
+    # --- Minh hoạ reorder (không cần API key) ---
+    demo = [{"content": f"Chunk hạng {i}", "score": 1.0 - i * 0.1} for i in range(5)]
+    print("\nReorder chống lost-in-the-middle:")
+    print(f"  trước: {[c['content'] for c in demo]}")
+    print(f"  sau  : {[c['content'] for c in reorder_for_llm(demo)]}")
+    print("  → hạng 1 ở đầu, hạng 2 ở cuối: hai vị trí LLM đọc kỹ nhất")
+
+    if not (OPENROUTER_API_KEY or OPENAI_API_KEY):
+        print("\n⚠ Chưa có OPENROUTER_API_KEY trong .env — bỏ qua phần gọi LLM.")
+        print("  Tạo .env từ .env.example rồi điền key để chạy đầy đủ.")
+        raise SystemExit(0)
+
+    for question in [
+        "Thời gian thử việc tối đa cho vị trí lập trình viên là bao lâu và "
+        "lương thử việc tối thiểu bằng bao nhiêu % lương chính thức?",
+        "Công ty sa thải tôi qua tin nhắn Zalo mà không báo trước 30 ngày "
+        "thì có đúng luật không?",
+    ]:
+        print(f"\n{'─' * 66}")
+        print(f"Hỏi: {question}")
+        result = generate_with_citation(question)
+        print(f"\n{result['answer']}")
+        print(f"\n[dùng {result['context_used']} nguồn, model {result['model']}]")
