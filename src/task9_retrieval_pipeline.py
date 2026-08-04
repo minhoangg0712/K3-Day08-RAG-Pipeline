@@ -17,7 +17,7 @@ from .task8_pageindex_vectorless import pageindex_search
 # Nếu best semantic score < threshold → fallback PageIndex.
 SCORE_THRESHOLD = 0.3
 DEFAULT_TOP_K = 5
-RERANK_METHOD = "cross_encoder"
+RERANK_METHOD = "rrf"
 
 
 def retrieve(
