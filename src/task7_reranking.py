@@ -14,9 +14,6 @@ bất kể nội dung đó có thật sự liên quan đến câu hỏi hay khô
 quyết định fallback ở Task 9 — xem ghi chú ở đó.
 """
 
-from typing import Optional
-
-
 def rerank_cross_encoder(
     query: str, candidates: list[dict], top_k: int = 5
 ) -> list[dict]:
@@ -126,28 +123,76 @@ def rerank_rrf(
     Returns:
         List of top_k candidates sorted by RRF score descending.
     """
-    # TODO: Implement RRF
-    #
-    # rrf_scores = {}  # content -> score
-    # content_map = {}  # content -> full dict
-    #
-    # for ranked_list in ranked_lists:
-    #     for rank, item in enumerate(ranked_list, 1):
-    #         key = item["content"]
-    #         rrf_scores[key] = rrf_scores.get(key, 0) + 1 / (k + rank)
-    #         content_map[key] = item
-    #
-    # # Sort by RRF score
-    # sorted_items = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
-    #
-    # results = []
-    # for content, score in sorted_items[:top_k]:
-    #     item = content_map[content].copy()
-    #     item["score"] = score
-    #     results.append(item)
-    #
-    # return results
-    raise NotImplementedError("Implement rerank_rrf")
+    if top_k <= 0 or not ranked_lists:
+        return []
+    if k < 0:
+        raise ValueError("k must be greater than or equal to 0")
+    if not isinstance(ranked_lists, list):
+        raise TypeError("ranked_lists must be a list of ranked result lists")
+
+    rrf_scores: dict[tuple, float] = {}
+    candidates_by_key: dict[tuple, dict] = {}
+    best_ranks: dict[tuple, int] = {}
+    first_seen: dict[tuple, int] = {}
+    seen_counter = 0
+
+    for list_index, ranked_list in enumerate(ranked_lists):
+        if not isinstance(ranked_list, list):
+            raise TypeError(f"ranked_lists[{list_index}] must be a list")
+
+        # Một tài liệu chỉ được tính một lần trong cùng một ranker. Nếu ranker
+        # vô tình trả trùng, lần xuất hiện đầu tiên (hạng tốt nhất) được giữ lại.
+        seen_in_this_list: set[tuple] = set()
+
+        for rank, item in enumerate(ranked_list, start=1):
+            if not isinstance(item, dict):
+                raise TypeError(
+                    f"ranked_lists[{list_index}][{rank - 1}] must be a dict"
+                )
+
+            content = item.get("content")
+            if not isinstance(content, str) or not content.strip():
+                raise ValueError("Each candidate must contain non-empty 'content'")
+
+            metadata = item.get("metadata")
+            metadata = metadata if isinstance(metadata, dict) else {}
+
+            # Ưu tiên ID ổn định do Task 4 tạo. Nếu dữ liệu từ ranker khác
+            # không có ID, nội dung chunk là khóa chung để fusion hai danh sách.
+            chunk_id = item.get("id") or metadata.get("chunk_id")
+            if chunk_id is not None:
+                key = ("id", str(chunk_id))
+            else:
+                key = ("content", content.strip())
+
+            if key in seen_in_this_list:
+                continue
+            seen_in_this_list.add(key)
+
+            rrf_scores[key] = rrf_scores.get(key, 0.0) + 1.0 / (k + rank)
+            best_ranks[key] = min(best_ranks.get(key, rank), rank)
+
+            if key not in candidates_by_key:
+                candidate = item.copy()
+                candidate["metadata"] = metadata.copy()
+                candidates_by_key[key] = candidate
+                first_seen[key] = seen_counter
+                seen_counter += 1
+
+    # Tie-break theo hạng tốt nhất rồi thứ tự xuất hiện để kết quả luôn ổn định.
+    ordered_keys = sorted(
+        rrf_scores,
+        key=lambda key: (-rrf_scores[key], best_ranks[key], first_seen[key]),
+    )
+
+    results: list[dict] = []
+    for key in ordered_keys[:top_k]:
+        candidate = candidates_by_key[key].copy()
+        candidate["metadata"] = candidates_by_key[key]["metadata"].copy()
+        candidate["score"] = rrf_scores[key]
+        results.append(candidate)
+
+    return results
 
 
 # =============================================================================
@@ -156,7 +201,7 @@ def rerank_rrf(
 
 def rerank(
     query: str,
-    candidates: list[dict],
+    candidates: list[dict] | list[list[dict]],
     top_k: int = 5,
     method: str = "rrf",  # "cross_encoder" | "mmr" | "rrf"
 ) -> list[dict]:
@@ -165,32 +210,56 @@ def rerank(
 
     Args:
         query: Câu truy vấn
-        candidates: Danh sách candidates từ retrieval
+        candidates: Một danh sách candidates đã xếp hạng, hoặc nhiều danh sách
+            từ các ranker khi dùng RRF.
         top_k: Số lượng kết quả sau rerank
         method: Phương pháp reranking
 
     Returns:
         List of top_k reranked candidates.
     """
+    method = method.lower().strip()
+
     if method == "cross_encoder":
+        if candidates and isinstance(candidates[0], list):
+            raise TypeError("cross_encoder expects one flat candidate list")
         return rerank_cross_encoder(query, candidates, top_k)
     elif method == "mmr":
         # Cần query_embedding - embed query trước
         raise NotImplementedError("Call rerank_mmr with query_embedding")
     elif method == "rrf":
-        # RRF cần nhiều ranked lists - gọi riêng
-        raise NotImplementedError("Call rerank_rrf with ranked_lists")
+        if not candidates:
+            return []
+
+        # API chung trong bộ test truyền một danh sách phẳng. Coi nó như kết
+        # quả của một ranker; khi tích hợp Task 5 + 6 có thể truyền [dense, sparse].
+        if isinstance(candidates[0], list):
+            if not all(isinstance(ranked_list, list) for ranked_list in candidates):
+                raise TypeError("RRF candidates must all be ranked lists")
+            return rerank_rrf(candidates, top_k=top_k)
+
+        if not all(isinstance(item, dict) for item in candidates):
+            raise TypeError("RRF candidates must be dictionaries")
+        return rerank_rrf([candidates], top_k=top_k)
     else:
         raise ValueError(f"Unknown rerank method: {method}")
 
 
 if __name__ == "__main__":
-    # Test with dummy data
-    dummy_candidates = [
-        {"content": "Tuition fee payment schedule", "score": 0.8, "metadata": {}},
-        {"content": "Scholarship eligibility requirements", "score": 0.6, "metadata": {}},
-        {"content": "Library study room booking guide", "score": 0.5, "metadata": {}},
+    import sys
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+    dense_results = [
+        {"content": "Lương thử việc tối thiểu bằng 85%.", "score": 0.86, "metadata": {}},
+        {"content": "Thử việc có thể kéo dài tối đa 60 ngày.", "score": 0.80, "metadata": {}},
     ]
-    results = rerank("tuition fee payment", dummy_candidates, top_k=2)
-    for r in results:
-        print(f"[{r['score']:.3f}] {r['content']}")
+    sparse_results = [
+        {"content": "Thử việc có thể kéo dài tối đa 60 ngày.", "score": 7.2, "metadata": {}},
+        {"content": "Lương thử việc tối thiểu bằng 85%.", "score": 5.8, "metadata": {}},
+    ]
+
+    results = rerank_rrf([dense_results, sparse_results], top_k=2)
+    for result in results:
+        print(f"[{result['score']:.6f}] {result['content']}")
