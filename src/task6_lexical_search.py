@@ -178,7 +178,21 @@ def load_corpus_from_chroma() -> list[dict]:
 
 
 def load_corpus_from_markdown() -> list[dict]:
-    """Nạp và tự cắt chunk từ data/standardized/ khi chưa có ChromaDB."""
+    """
+    Nạp và cắt chunk từ data/standardized/ khi chưa có ChromaDB.
+
+    Gọi thẳng hàm của Task 4 chứ không tự cắt lại: chỉ cần lệch một tham số
+    (chunk_size, separator, ngưỡng bỏ chunk ngắn) là hai bên ra hai tập chunk
+    khác nhau, và RRF ở Task 7 lập tức mất khả năng gộp điểm. Dùng chung một hàm
+    thì sai lệch đó không thể xảy ra.
+    """
+    try:
+        from src.task4_chunking_indexing import chunk_documents, load_documents
+        return chunk_documents(load_documents())
+    except ImportError:
+        pass
+
+    # Task 4 chưa sẵn sàng -> tự cắt bằng tham số tương đương
     if not STANDARDIZED_DIR.exists():
         return []
 
